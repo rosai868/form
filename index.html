@@ -1,0 +1,1693 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シフト希望管理システム</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', 'メイリオ', Meiryo, sans-serif;
+            background: #f5f3f0;
+            background-image: 
+                repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.5) 35px, rgba(255,255,255,.5) 70px),
+                linear-gradient(180deg, #e8dfd3 0%, #f5f3f0 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #fefefe;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(84, 73, 63, 0.12);
+            padding: 35px;
+            width: 100%;
+            max-width: 920px;
+            border: 1px solid rgba(209, 196, 184, 0.3);
+        }
+
+        .login-container {
+            max-width: 420px;
+            background: linear-gradient(145deg, #ffffff 0%, #faf8f6 100%);
+        }
+
+        h1, h2 {
+            color: #4a3f36;
+            margin-bottom: 25px;
+            text-align: center;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        h1 {
+            font-size: 24px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        h1:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #89b3a2, #c9a689);
+            border-radius: 2px;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: #5a4d44;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #6b5d54;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e0d5c7;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #fefefe;
+            color: #4a3f36;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #89b3a2;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(137, 179, 162, 0.15);
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #89b3a2 0%, #7fa394 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(137, 179, 162, 0.25);
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(137, 179, 162, 0.35);
+            background: linear-gradient(135deg, #7fa394 0%, #759a8a 100%);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 3px;
+            margin-top: 20px;
+            padding: 15px;
+            background: #faf8f6;
+            border-radius: 8px;
+            border: 1px solid #e0d5c7;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #faf8f6;
+            border-radius: 8px;
+            border: 1px solid #e0d5c7;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1/1;
+            border: 1px solid #d9cfc2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            background: white;
+            min-height: 50px;
+            padding: 3px;
+        }
+
+        .calendar-day:hover:not(.disabled) {
+            background-color: #f5f0ea;
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .calendar-day.selected {
+            border: 2px solid #7fa394;
+            background: #f0f6f4;
+        }
+
+        .calendar-day.sunday {
+            color: #d45d5d;
+            background: #fff5f5;
+        }
+
+        .calendar-day.saturday {
+            color: #5d7fb8;
+            background: #f5f8ff;
+        }
+
+        .calendar-day.holiday {
+            background-color: #ffe8e8;
+            color: #d45d5d;
+            font-weight: 600;
+        }
+
+        .calendar-day.disabled {
+            background-color: #f5f5f5;
+            color: #b8b8b8;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .calendar-day-number {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .calendar-day-request {
+            font-size: 11px;
+            margin-top: 2px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: white;
+        }
+
+        /* 希望種別の色分け */
+        .request-type-休 {
+            background-color: #e74c3c;
+        }
+
+        .request-type-年 {
+            background-color: #3498db;
+        }
+
+        .request-type-出 {
+            background-color: #f39c12;
+        }
+
+        .request-type-日 {
+            background-color: #27ae60;
+        }
+
+        .weekday-header {
+            text-align: center;
+            font-weight: 600;
+            padding: 10px;
+            background-color: #f0ebe5;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #5a4d44;
+        }
+
+        .timer {
+            background: linear-gradient(135deg, #d4a574 0%, #c9a689 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(212, 165, 116, 0.25);
+        }
+
+        .timer-display {
+            font-size: 26px;
+            font-weight: 600;
+            margin-top: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .request-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .request-button {
+            padding: 15px;
+            border: 2px solid #e0d5c7;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .request-button[data-type="休"] {
+            border-left: 5px solid #e74c3c;
+        }
+
+        .request-button[data-type="年"] {
+            border-left: 5px solid #3498db;
+        }
+
+        .request-button[data-type="出"] {
+            border-left: 5px solid #f39c12;
+        }
+
+        .request-button[data-type="日"] {
+            border-left: 5px solid #27ae60;
+        }
+
+        .request-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .request-button.active {
+            background: #f0ebe5;
+            transform: scale(0.98);
+        }
+
+        .request-button.active[data-type="休"] {
+            background: rgba(231, 76, 60, 0.1);
+            border-color: #e74c3c;
+        }
+
+        .request-button.active[data-type="年"] {
+            background: rgba(52, 152, 219, 0.1);
+            border-color: #3498db;
+        }
+
+        .request-button.active[data-type="出"] {
+            background: rgba(243, 156, 18, 0.1);
+            border-color: #f39c12;
+        }
+
+        .request-button.active[data-type="日"] {
+            background: rgba(39, 174, 96, 0.1);
+            border-color: #27ae60;
+        }
+
+        .request-button strong {
+            font-size: 18px;
+            color: #4a3f36;
+        }
+
+        .selected-dates {
+            margin-top: 20px;
+            padding: 18px;
+            background: linear-gradient(145deg, #faf8f6, #f5f3f0);
+            border-radius: 8px;
+            border: 1px solid #e0d5c7;
+        }
+
+        .selected-dates h3 {
+            color: #5a4d44;
+            font-size: 16px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .selected-date-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #e0d5c7;
+            transition: all 0.2s ease;
+        }
+
+        .selected-date-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .admin-table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            border: 1px solid #e0d5c7;
+            border-radius: 8px;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            font-size: 12px;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            border: 1px solid #e0d5c7;
+            padding: 6px 4px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .admin-table th {
+            background: linear-gradient(135deg, #89b3a2, #7fa394);
+            color: white;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .admin-table th:first-child,
+        .admin-table td:first-child {
+            position: sticky;
+            left: 0;
+            background: #fefefe;
+            z-index: 5;
+            min-width: 80px;
+            font-weight: 600;
+        }
+
+        .admin-table th:first-child {
+            z-index: 11;
+            background: linear-gradient(135deg, #89b3a2, #7fa394);
+        }
+
+        .admin-table tr:nth-child(even) {
+            background-color: #faf8f6;
+        }
+
+        .admin-table tr:hover {
+            background-color: #f5f0ea;
+        }
+
+        .admin-table .day-cell {
+            min-width: 28px;
+            max-width: 35px;
+            font-weight: bold;
+        }
+
+        /* 希望タイプごとのセル色 */
+        .admin-table .cell-休 {
+            background-color: rgba(231, 76, 60, 0.2);
+        }
+
+        .admin-table .cell-年 {
+            background-color: rgba(52, 152, 219, 0.2);
+        }
+
+        .admin-table .cell-出 {
+            background-color: rgba(243, 156, 18, 0.2);
+        }
+
+        .admin-table .cell-日 {
+            background-color: rgba(39, 174, 96, 0.2);
+        }
+
+        .logout-button {
+            background: linear-gradient(135deg, #c9a689 0%, #b89476 100%);
+            margin-top: 20px;
+        }
+
+        .logout-button:hover {
+            background: linear-gradient(135deg, #b89476 0%, #a78365 100%);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .nav-button {
+            flex: 1;
+        }
+
+        .error-message {
+            color: #d45d5d;
+            margin-top: 12px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .success-message {
+            color: #27ae60;
+            margin-top: 12px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* カレンダーの希望種別表示をより見やすく */
+        .calendar-day.selected .calendar-day-request {
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.9; }
+            50% { opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .calendar {
+                gap: 2px;
+                padding: 10px;
+            }
+            
+            .calendar-day {
+                font-size: 12px;
+                min-height: 40px;
+            }
+
+            .request-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ログイン画面 -->
+    <div id="loginSection" class="container login-container">
+        <h1>シフト希望管理システム</h1>
+        <div class="form-group">
+            <label for="userId">職員ID</label>
+            <input type="text" id="userId" placeholder="職員IDを入力">
+        </div>
+        <div class="form-group">
+            <label for="password">パスワード (5桁の数字)</label>
+            <input type="password" id="password" placeholder="パスワードを入力" maxlength="5">
+        </div>
+        <button onclick="login()">ログイン</button>
+        <div id="loginError" class="error-message"></div>
+    </div>
+
+    <!-- パスワード変更画面 -->
+    <div id="changePasswordSection" class="container login-container hidden">
+        <h2>初回ログイン - パスワード変更</h2>
+        <p style="margin-bottom: 20px; color: #666;">新しいパスワード（5桁の数字）を設定してください</p>
+        <div class="form-group">
+            <label for="newPassword">新しいパスワード</label>
+            <input type="password" id="newPassword" placeholder="5桁の数字" maxlength="5">
+        </div>
+        <div class="form-group">
+            <label for="confirmPassword">パスワード確認</label>
+            <input type="password" id="confirmPassword" placeholder="もう一度入力" maxlength="5">
+        </div>
+        <button onclick="changePassword()">パスワード変更</button>
+        <div id="passwordError" class="error-message"></div>
+    </div>
+
+    <!-- メイン画面（一般職員用） -->
+    <div id="mainSection" class="container hidden">
+        <h1>シフト希望入力</h1>
+        <div id="welcomeMessage" style="text-align: center; margin-bottom: 20px; color: #666;"></div>
+        
+        <div class="timer">
+            <div>締切まで残り時間</div>
+            <div id="countdown" class="timer-display">計算中...</div>
+        </div>
+
+        <div class="calendar-header">
+            <button onclick="previousMonth()" style="width: auto; padding: 10px 20px;">前月</button>
+            <h2 id="currentMonth"></h2>
+            <button onclick="nextMonth()" style="width: auto; padding: 10px 20px;">翌月</button>
+        </div>
+
+        <div class="calendar" id="calendar">
+            <!-- カレンダーはJavaScriptで生成 -->
+        </div>
+
+        <div class="request-buttons">
+            <div class="request-button" onclick="setRequestType('休')" data-type="休">
+                <strong>休</strong> - 休み希望
+            </div>
+            <div class="request-button" onclick="setRequestType('年')" data-type="年">
+                <strong>年</strong> - 年休希望
+            </div>
+            <div class="request-button" onclick="setRequestType('出')" data-type="出">
+                <strong>出</strong> - 出張希望
+            </div>
+            <div class="request-button" onclick="setRequestType('日')" data-type="日">
+                <strong>日</strong> - 日勤希望
+            </div>
+        </div>
+
+        <div class="selected-dates">
+            <h3>選択済みの希望</h3>
+            <div id="selectedDatesList"></div>
+        </div>
+
+        <div id="submissionHistory" class="selected-dates" style="margin-top: 15px; display: none;">
+            <h3>提出履歴</h3>
+            <div id="submissionHistoryContent"></div>
+        </div>
+
+        <button onclick="submitRequests()">希望を提出</button>
+        
+        <div id="submissionStatus" class="selected-dates" style="margin-top: 15px;">
+            <h3>今月の提出状況</h3>
+            <div id="submissionStatusContent"></div>
+        </div>
+        
+        <button onclick="logout()" class="logout-button">ログアウト</button>
+        <div id="submitMessage" style="margin-top: 10px; text-align: center;"></div>
+    </div>
+
+    <!-- 管理者画面 -->
+    <div id="adminSection" class="container hidden">
+        <h1>管理者画面 - 希望一覧</h1>
+        
+        <div class="nav-buttons">
+            <button onclick="showPreviousMonth()" class="nav-button">前月</button>
+            <button onclick="showCurrentMonth()" class="nav-button">今月</button>
+            <button onclick="showNextMonth()" class="nav-button">翌月</button>
+        </div>
+
+        <h2 id="adminMonth"></h2>
+
+        <div class="admin-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr id="adminTableHeader">
+                        <!-- ヘッダーはJavaScriptで生成 -->
+                    </tr>
+                </thead>
+                <tbody id="adminTableBody">
+                    <!-- テーブル本体はJavaScriptで生成 -->
+                </tbody>
+            </table>
+        </div>
+
+        <button onclick="exportToCSV()" style="margin-top: 20px;">CSVエクスポート</button>
+        
+        <div style="margin-top: 30px; padding: 20px; background: #f8f8f8; border-radius: 10px;">
+            <h3>パスワードリセット</h3>
+            <div style="display: flex; gap: 10px; align-items: center; margin-top: 15px;">
+                <select id="resetStaffSelect" style="flex: 1;">
+                    <option value="">職員を選択してください</option>
+                </select>
+                <input type="password" id="newResetPassword" placeholder="新しいパスワード（5桁）" maxlength="5" style="flex: 1;">
+                <button onclick="resetStaffPassword()" style="width: auto; padding: 12px 30px; background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);">パスワードリセット</button>
+            </div>
+            <div id="resetMessage" style="margin-top: 10px; text-align: center;"></div>
+            <button onclick="showPasswordStatus()" style="margin-top: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">全職員のパスワード状況を確認</button>
+        </div>
+        
+        <button onclick="logout()" class="logout-button">ログアウト</button>
+    </div>
+
+    <script>
+        // 職員データ
+        const staff = [
+            { id: 1, name: '長坂', password: '12345' },
+            { id: 2, name: '中里', password: '23456' },
+            { id: 3, name: '渥美', password: '34567' },
+            { id: 4, name: '田中', password: '45678' },
+            { id: 5, name: '三浦', password: '56789' },
+            { id: 6, name: '小飯塚', password: '67890' },
+            { id: 7, name: '岡野', password: '78901' },
+            { id: 8, name: '山梨', password: '89012' },
+            { id: 9, name: '中村', password: '90123' },
+            { id: 10, name: '加瀬', password: '01234' },
+            { id: 11, name: '石沢', password: '11223' },
+            { id: 12, name: '佐藤', password: '22334' },
+            { id: 13, name: '蔵元', password: '33445' },
+            { id: 14, name: '青島', password: '44556' },
+            { id: 15, name: '中垣', password: '55667' },
+            { id: 16, name: '長田', password: '66778' },
+            { id: 17, name: '圷', password: '77889' },
+            { id: 18, name: '井清', password: '88990' },
+            { id: 19, name: '山本', password: '99001' },
+            { id: 20, name: '田端', password: '00112' },
+            { id: 21, name: '竹鼻', password: '11234' },
+            { id: 22, name: '新垣', password: '22345' },
+            { id: 23, name: '熊谷', password: '33456' },
+            { id: 24, name: '岩井', password: '44567' },
+            { id: 25, name: '相良', password: '55678' },
+            { id: 26, name: '高橋', password: '66789' },
+            { id: 27, name: '白井', password: '77890' },
+            { id: 28, name: '今野', password: '88901' },
+            { id: 29, name: '和田', password: '99012' },
+            { id: 30, name: '村上', password: '00123' }
+        ];
+
+        // 管理者アカウント
+        const adminAccount = { id: 'admin', password: '99999' };
+
+        // 2025年の日本の祝日
+        const holidays2025 = {
+            '2025-01-01': '元日',
+            '2025-01-13': '成人の日',
+            '2025-02-11': '建国記念の日',
+            '2025-02-23': '天皇誕生日',
+            '2025-02-24': '振替休日',
+            '2025-03-20': '春分の日',
+            '2025-04-29': '昭和の日',
+            '2025-05-03': '憲法記念日',
+            '2025-05-04': 'みどりの日',
+            '2025-05-05': 'こどもの日',
+            '2025-05-06': '振替休日',
+            '2025-07-21': '海の日',
+            '2025-08-11': '山の日',
+            '2025-09-15': '敬老の日',
+            '2025-09-23': '秋分の日',
+            '2025-10-13': 'スポーツの日',
+            '2025-11-03': '文化の日',
+            '2025-11-23': '勤労感謝の日',
+            '2025-11-24': '振替休日'
+        };
+
+        // 2026年の日本の祝日（暫定）
+        const holidays2026 = {
+            '2026-01-01': '元日',
+            '2026-01-12': '成人の日',
+            '2026-02-11': '建国記念の日',
+            '2026-02-23': '天皇誕生日',
+            '2026-03-20': '春分の日',
+            '2026-04-29': '昭和の日',
+            '2026-05-03': '憲法記念日',
+            '2026-05-04': 'みどりの日',
+            '2026-05-05': 'こどもの日',
+            '2026-05-06': '振替休日',
+            '2026-07-20': '海の日',
+            '2026-08-11': '山の日',
+            '2026-09-21': '敬老の日',
+            '2026-09-22': '国民の休日',
+            '2026-09-23': '秋分の日',
+            '2026-10-12': 'スポーツの日',
+            '2026-11-03': '文化の日',
+            '2026-11-23': '勤労感謝の日'
+        };
+
+        // すべての祝日を統合
+        const allHolidays = { ...holidays2025, ...holidays2026 };
+
+        // グローバル変数
+        let currentUser = null;
+        let currentMonth = new Date();
+        let selectedDates = {};
+        let selectedRequestType = null;
+        let isFirstLogin = {};
+
+        // LocalStorageからデータを読み込み
+        function loadData() {
+            const savedRequests = localStorage.getItem('shiftRequests');
+            if (savedRequests) {
+                return JSON.parse(savedRequests);
+            }
+            return {};
+        }
+
+        // LocalStorageにデータを保存
+        function saveData(data) {
+            localStorage.setItem('shiftRequests', JSON.stringify(data));
+        }
+
+        // パスワードデータの読み込み
+        function loadPasswords() {
+            const saved = localStorage.getItem('staffPasswords');
+            if (saved) {
+                return JSON.parse(saved);
+            }
+            // 初期パスワードを設定
+            const initial = {};
+            staff.forEach(s => {
+                initial[s.id] = s.password;
+            });
+            return initial;
+        }
+
+        // パスワードデータの保存
+        function savePasswords(passwords) {
+            localStorage.setItem('staffPasswords', JSON.stringify(passwords));
+        }
+
+        // 初回ログインフラグの読み込み
+        function loadFirstLoginFlags() {
+            const saved = localStorage.getItem('firstLoginFlags');
+            if (saved) {
+                return JSON.parse(saved);
+            }
+            return {};
+        }
+
+        // 初回ログインフラグの保存
+        function saveFirstLoginFlags(flags) {
+            localStorage.setItem('firstLoginFlags', JSON.stringify(flags));
+        }
+
+        // ログイン処理
+        function login() {
+            const userId = document.getElementById('userId').value;
+            const password = document.getElementById('password').value;
+            const passwords = loadPasswords();
+            isFirstLogin = loadFirstLoginFlags();
+
+            // 管理者チェック
+            if (userId === adminAccount.id && password === adminAccount.password) {
+                currentUser = { id: 'admin', name: '管理者' };
+                showAdminSection();
+                return;
+            }
+
+            // 一般職員チェック
+            const staffMember = staff.find(s => s.id == userId);
+            if (staffMember && passwords[staffMember.id] === password) {
+                currentUser = staffMember;
+                
+                // 初回ログインチェック
+                if (!isFirstLogin[staffMember.id]) {
+                    showChangePasswordSection();
+                } else {
+                    showMainSection();
+                }
+            } else {
+                document.getElementById('loginError').textContent = 'IDまたはパスワードが正しくありません';
+            }
+        }
+
+        // パスワード変更画面表示
+        function showChangePasswordSection() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('changePasswordSection').classList.remove('hidden');
+        }
+
+        // パスワード変更処理
+        function changePassword() {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!/^\d{5}$/.test(newPassword)) {
+                document.getElementById('passwordError').textContent = '5桁の数字を入力してください';
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                document.getElementById('passwordError').textContent = 'パスワードが一致しません';
+                return;
+            }
+
+            // パスワードを更新
+            const passwords = loadPasswords();
+            passwords[currentUser.id] = newPassword;
+            savePasswords(passwords);
+
+            // 初回ログインフラグを更新
+            isFirstLogin[currentUser.id] = true;
+            saveFirstLoginFlags(isFirstLogin);
+
+            // メイン画面へ
+            showMainSection();
+        }
+
+        // メイン画面表示
+        function showMainSection() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('changePasswordSection').classList.add('hidden');
+            document.getElementById('adminSection').classList.add('hidden');
+            document.getElementById('mainSection').classList.remove('hidden');
+            
+            document.getElementById('welcomeMessage').textContent = `${currentUser.name}さん、こんにちは`;
+            
+            // 現在の月を設定
+            setTargetMonth();
+            renderCalendar();
+            startCountdown();
+            loadUserRequests();
+            updateSubmissionStatus();
+        }
+
+        // 提出状況を更新
+        function updateSubmissionStatus() {
+            const allRequests = loadData();
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth() + 1;
+            const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+            
+            const statusDiv = document.getElementById('submissionStatus');
+            const statusContent = document.getElementById('submissionStatusContent');
+            
+            const monthRequests = allRequests[monthKey] || {};
+            
+            // 提出済みと未提出を分類
+            const submitted = [];
+            const notSubmitted = [];
+            
+            staff.forEach(s => {
+                if (monthRequests[s.id]) {
+                    const submission = monthRequests[s.id];
+                    if (submission.submittedAt || Object.keys(submission).length > 0) {
+                        submitted.push(s.name);
+                    } else {
+                        notSubmitted.push(s.name);
+                    }
+                } else {
+                    notSubmitted.push(s.name);
+                }
+            });
+            
+            let html = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
+            
+            // 提出済み
+            html += '<div style="background: rgba(39, 174, 96, 0.1); padding: 10px; border-radius: 6px; border-left: 4px solid #27ae60;">';
+            html += '<h4 style="color: #27ae60; margin-bottom: 8px; font-size: 14px;">✓ 提出済み (' + submitted.length + '名)</h4>';
+            html += '<div style="font-size: 12px; color: #666; max-height: 100px; overflow-y: auto;">';
+            if (submitted.length > 0) {
+                html += submitted.join('、');
+            } else {
+                html += '未提出';
+            }
+            html += '</div></div>';
+            
+            // 未提出
+            html += '<div style="background: rgba(231, 76, 60, 0.1); padding: 10px; border-radius: 6px; border-left: 4px solid #e74c3c;">';
+            html += '<h4 style="color: #e74c3c; margin-bottom: 8px; font-size: 14px;">× 未提出 (' + notSubmitted.length + '名)</h4>';
+            html += '<div style="font-size: 12px; color: #666; max-height: 100px; overflow-y: auto;">';
+            if (notSubmitted.length > 0) {
+                html += notSubmitted.join('、');
+            } else {
+                html += '全員提出済み';
+            }
+            html += '</div></div>';
+            
+            html += '</div>';
+            
+            // 進捗バー
+            const percentage = Math.round((submitted.length / staff.length) * 100);
+            html += '<div style="margin-top: 15px;">';
+            html += '<div style="background: #e0e0e0; height: 20px; border-radius: 10px; overflow: hidden;">';
+            html += `<div style="background: linear-gradient(90deg, #27ae60, #2ecc71); height: 100%; width: ${percentage}%; transition: width 0.5s; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: bold;">`;
+            if (percentage > 20) {
+                html += `${percentage}%`;
+            }
+            html += '</div></div>';
+            html += `<div style="text-align: center; margin-top: 5px; font-size: 12px; color: #666;">提出率: ${percentage}% (${submitted.length}/${staff.length}名)</div>`;
+            html += '</div>';
+            
+            statusContent.innerHTML = html;
+        }
+
+        // 管理者画面表示
+        function showAdminSection() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('mainSection').classList.add('hidden');
+            document.getElementById('adminSection').classList.remove('hidden');
+            
+            // 職員選択リストを初期化
+            const selectElement = document.getElementById('resetStaffSelect');
+            selectElement.innerHTML = '<option value="">職員を選択してください</option>';
+            staff.forEach(s => {
+                const option = document.createElement('option');
+                option.value = s.id;
+                option.textContent = `${s.id}. ${s.name}`;
+                selectElement.appendChild(option);
+            });
+            
+            currentMonth = new Date();
+            renderAdminTable();
+        }
+
+        // 対象月の設定（より直感的なロジック）
+        function setTargetMonth() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth();
+            const currentDay = now.getDate();
+            
+            // 毎月7日締切で、翌月のシフトを決定
+            // 例：10/28は11/7の締切前なので、12月のシフトを入力
+            // 例：11/8は11/7の締切後なので、1月のシフトを入力
+            
+            // 現在の月の7日の締切日時を作成
+            const currentMonthDeadline = new Date(currentYear, currentMonth, 7, 23, 59, 59);
+            
+            if (now <= currentMonthDeadline) {
+                // 今月の締切前 = 翌月のシフトを入力
+                currentMonth = new Date(currentYear, currentMonth + 1, 1);
+            } else {
+                // 今月の締切後 = 翌々月のシフトを入力
+                currentMonth = new Date(currentYear, currentMonth + 2, 1);
+            }
+        }
+
+        // カレンダー描画
+        function renderCalendar() {
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+            
+            document.getElementById('currentMonth').textContent = `${year}年${month + 1}月`;
+            
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+            
+            // 曜日ヘッダー
+            const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+            weekdays.forEach((day, index) => {
+                const header = document.createElement('div');
+                header.className = 'weekday-header';
+                if (index === 0) header.style.color = '#ff4444';
+                if (index === 6) header.style.color = '#4444ff';
+                header.textContent = day;
+                calendar.appendChild(header);
+            });
+            
+            // 月の最初の日と最後の日を取得
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDay = firstDay.getDay();
+            
+            // 空白の日を追加
+            for (let i = 0; i < startDay; i++) {
+                const emptyDay = document.createElement('div');
+                calendar.appendChild(emptyDay);
+            }
+            
+            // 日付を追加
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                
+                const date = new Date(year, month, day);
+                const dateString = formatDate(date);
+                const dayOfWeek = date.getDay();
+                
+                // 曜日による色分け
+                if (dayOfWeek === 0) dayElement.classList.add('sunday');
+                if (dayOfWeek === 6) dayElement.classList.add('saturday');
+                
+                // 祝日チェック
+                if (allHolidays[dateString]) {
+                    dayElement.classList.add('holiday');
+                    dayElement.title = allHolidays[dateString];
+                }
+                
+                // 締切チェック
+                if (!isDateSelectable(date)) {
+                    dayElement.classList.add('disabled');
+                } else {
+                    dayElement.onclick = () => toggleDate(dateString, dayElement);
+                }
+                
+                // 日付番号
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'calendar-day-number';
+                dayNumber.textContent = day;
+                dayElement.appendChild(dayNumber);
+                
+                // 既存の希望表示
+                if (selectedDates[dateString]) {
+                    const request = document.createElement('div');
+                    request.className = `calendar-day-request request-type-${selectedDates[dateString]}`;
+                    request.textContent = selectedDates[dateString];
+                    dayElement.appendChild(request);
+                    dayElement.classList.add('selected');
+                }
+                
+                calendar.appendChild(dayElement);
+            }
+        }
+
+        // 日付のフォーマット
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // 日付が選択可能かチェック
+        function isDateSelectable(date) {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth();
+            const targetYear = date.getFullYear();
+            const targetMonth = date.getMonth();
+            
+            // 現在の月の締切を確認
+            const currentMonthDeadline = new Date(currentYear, currentMonth, 7, 23, 59, 59);
+            
+            if (now <= currentMonthDeadline) {
+                // 締切前 = 翌月が選択可能
+                const nextMonth = new Date(currentYear, currentMonth + 1, 1);
+                return targetYear === nextMonth.getFullYear() && targetMonth === nextMonth.getMonth();
+            } else {
+                // 締切後 = 翌々月が選択可能
+                const nextNextMonth = new Date(currentYear, currentMonth + 2, 1);
+                return targetYear === nextNextMonth.getFullYear() && targetMonth === nextNextMonth.getMonth();
+            }
+        }
+
+        // 希望タイプ設定
+        function setRequestType(type) {
+            selectedRequestType = type;
+            
+            // ボタンのアクティブ状態を更新
+            document.querySelectorAll('.request-button').forEach(btn => {
+                if (btn.dataset.type === type) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        // 日付選択トグル
+        function toggleDate(dateString, element) {
+            if (!selectedRequestType) {
+                alert('希望の種類を選択してください');
+                return;
+            }
+            
+            if (selectedDates[dateString]) {
+                delete selectedDates[dateString];
+                element.classList.remove('selected');
+                element.querySelector('.calendar-day-request')?.remove();
+            } else {
+                selectedDates[dateString] = selectedRequestType;
+                element.classList.add('selected');
+                
+                const request = document.createElement('div');
+                request.className = `calendar-day-request request-type-${selectedRequestType}`;
+                request.textContent = selectedRequestType;
+                element.appendChild(request);
+            }
+            
+            updateSelectedDatesList();
+        }
+
+        // 選択済み日付リスト更新
+        function updateSelectedDatesList() {
+            const list = document.getElementById('selectedDatesList');
+            list.innerHTML = '';
+            
+            const sortedDates = Object.keys(selectedDates).sort();
+            
+            if (sortedDates.length === 0) {
+                list.innerHTML = '<p style="color: #999;">選択された日付はありません</p>';
+                return;
+            }
+            
+            sortedDates.forEach(date => {
+                const item = document.createElement('div');
+                item.className = 'selected-date-item';
+                
+                const dateText = document.createElement('span');
+                dateText.textContent = `${date} - ${selectedDates[date]}`;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = '削除';
+                removeBtn.style.width = 'auto';
+                removeBtn.style.padding = '5px 15px';
+                removeBtn.onclick = () => {
+                    delete selectedDates[date];
+                    renderCalendar();
+                    updateSelectedDatesList();
+                };
+                
+                item.appendChild(dateText);
+                item.appendChild(removeBtn);
+                list.appendChild(item);
+            });
+        }
+
+        // 提出履歴を更新
+        function updateSubmissionHistory() {
+            const allRequests = loadData();
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth() + 1;
+            const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+            
+            const historyDiv = document.getElementById('submissionHistory');
+            const historyContent = document.getElementById('submissionHistoryContent');
+            
+            if (allRequests[monthKey] && allRequests[monthKey][currentUser.id]) {
+                const submission = allRequests[monthKey][currentUser.id];
+                
+                if (submission.submittedAt) {
+                    historyDiv.style.display = 'block';
+                    const submittedDate = new Date(submission.submittedAt);
+                    const dateStr = `${submittedDate.getFullYear()}年${submittedDate.getMonth() + 1}月${submittedDate.getDate()}日 ${submittedDate.getHours()}:${String(submittedDate.getMinutes()).padStart(2, '0')}`;
+                    
+                    let html = `<p style="color: #666; margin-bottom: 10px;">最終提出日時: ${dateStr}`;
+                    if (submission.updatedCount > 0) {
+                        html += ` (${submission.updatedCount}回更新済み)`;
+                    }
+                    html += '</p>';
+                    
+                    // 提出済みの希望を表示
+                    const dates = submission.dates || submission;
+                    const sortedDates = Object.keys(dates).sort();
+                    
+                    html += '<div style="background: #f0f0f0; padding: 10px; border-radius: 5px;">';
+                    sortedDates.forEach(date => {
+                        if (date !== 'submittedAt' && date !== 'updatedCount') {
+                            html += `<div style="margin-bottom: 5px;">${date} - ${dates[date]}</div>`;
+                        }
+                    });
+                    html += '</div>';
+                    
+                    html += '<button onclick="loadSubmittedRequests()" style="margin-top: 10px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">提出済みの内容を編集</button>';
+                    
+                    historyContent.innerHTML = html;
+                } else {
+                    historyDiv.style.display = 'none';
+                }
+            } else {
+                historyDiv.style.display = 'none';
+            }
+        }
+
+        // 提出済みの希望を読み込んで編集
+        function loadSubmittedRequests() {
+            const allRequests = loadData();
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth() + 1;
+            const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+            
+            if (allRequests[monthKey] && allRequests[monthKey][currentUser.id]) {
+                const submission = allRequests[monthKey][currentUser.id];
+                selectedDates = submission.dates || submission;
+                renderCalendar();
+                updateSelectedDatesList();
+                
+                // スクロールしてカレンダーを表示
+                document.getElementById('calendar').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // ユーザーの希望を読み込み
+        function loadUserRequests() {
+            const allRequests = loadData();
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth() + 1;
+            const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+            
+            if (allRequests[monthKey] && allRequests[monthKey][currentUser.id]) {
+                const submission = allRequests[monthKey][currentUser.id];
+                // 古いデータ形式との互換性を保つ
+                if (submission.dates) {
+                    selectedDates = submission.dates;
+                } else {
+                    selectedDates = submission;
+                }
+                renderCalendar();
+                updateSelectedDatesList();
+                updateSubmissionHistory();
+            }
+        }
+
+        // 希望提出
+        function submitRequests() {
+            if (Object.keys(selectedDates).length === 0) {
+                alert('希望する日付を選択してください');
+                return;
+            }
+            
+            const allRequests = loadData();
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth() + 1;
+            const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+            
+            // 既存の提出があるかチェック
+            const isUpdate = allRequests[monthKey] && allRequests[monthKey][currentUser.id];
+            
+            if (isUpdate) {
+                if (!confirm('既に提出済みの希望があります。上書きしてもよろしいですか？')) {
+                    return;
+                }
+            }
+            
+            if (!allRequests[monthKey]) {
+                allRequests[monthKey] = {};
+            }
+            
+            // 提出日時を記録
+            const submission = {
+                dates: selectedDates,
+                submittedAt: new Date().toISOString(),
+                updatedCount: isUpdate ? (allRequests[monthKey][currentUser.id].updatedCount || 0) + 1 : 0
+            };
+            
+            allRequests[monthKey][currentUser.id] = submission;
+            saveData(allRequests);
+            
+            const message = isUpdate 
+                ? '<span style="color: #44bb44;">希望が正常に更新されました！</span>'
+                : '<span style="color: #44bb44;">希望が正常に提出されました！</span>';
+            
+            document.getElementById('submitMessage').innerHTML = message;
+            
+            // 提出履歴を更新
+            updateSubmissionHistory();
+            updateSubmissionStatus();
+            
+            setTimeout(() => {
+                document.getElementById('submitMessage').innerHTML = '';
+            }, 3000);
+        }
+
+        // カウントダウンタイマー
+        function startCountdown() {
+            function updateCountdown() {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = now.getMonth();
+                
+                // 現在表示中の対象月を取得
+                const targetMonthStr = document.getElementById('currentMonth').textContent;
+                const targetInfo = `${targetMonthStr}のシフト希望`;
+                
+                // 次の締切日を計算
+                let deadline;
+                const currentMonthDeadline = new Date(year, month, 7, 23, 59, 59);
+                
+                if (now <= currentMonthDeadline) {
+                    // 今月の締切がまだ
+                    deadline = currentMonthDeadline;
+                } else {
+                    // 来月の締切
+                    deadline = new Date(year, month + 1, 7, 23, 59, 59);
+                }
+                
+                const diff = deadline - now;
+                
+                if (diff > 0) {
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    
+                    document.getElementById('countdown').innerHTML = 
+                        `${days}日 ${hours}時間 ${minutes}分 ${seconds}秒<br><small style="font-size: 14px; opacity: 0.9;">${targetInfo}</small>`;
+                } else {
+                    document.getElementById('countdown').textContent = '締切を過ぎました';
+                    // 月を更新
+                    setTargetMonth();
+                    renderCalendar();
+                    loadUserRequests();
+                }
+            }
+            
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+
+        // 前月表示
+        function previousMonth() {
+            // ユーザーは対象月しか表示できないので何もしない
+            alert('前月の希望入力期間は終了しています');
+        }
+
+        // 翌月表示
+        function nextMonth() {
+            // ユーザーは対象月しか表示できないので何もしない
+            alert('翌月の希望入力期間はまだ開始されていません');
+        }
+
+        // 管理者用：テーブル描画
+        function renderAdminTable() {
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth() + 1;
+            const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+            
+            document.getElementById('adminMonth').textContent = `${year}年${month}月の希望一覧`;
+            
+            const allRequests = loadData();
+            const monthRequests = allRequests[monthKey] || {};
+            
+            // テーブルヘッダー作成
+            const header = document.getElementById('adminTableHeader');
+            header.innerHTML = '<th>職員名</th>';
+            
+            // その月の全日付を追加
+            const daysInMonth = new Date(year, month, 0).getDate();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const th = document.createElement('th');
+                th.className = 'day-cell';
+                const date = new Date(year, month - 1, day);
+                const dayOfWeek = date.getDay();
+                
+                // 曜日の文字
+                const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+                th.innerHTML = `${day}<br><span style="font-size: 10px;">${weekdays[dayOfWeek]}</span>`;
+                
+                if (dayOfWeek === 0) th.style.color = '#ff4444';
+                if (dayOfWeek === 6) th.style.color = '#4444ff';
+                
+                // 祝日チェック
+                const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                if (allHolidays[dateString]) {
+                    th.style.backgroundColor = 'rgba(255, 68, 68, 0.2)';
+                    th.title = allHolidays[dateString];
+                }
+                
+                header.appendChild(th);
+            }
+            
+            // テーブルボディ作成
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = '';
+            
+            // 提出状況をカウント
+            let submittedCount = 0;
+            let totalRequests = 0;
+            
+            staff.forEach(staffMember => {
+                const row = document.createElement('tr');
+                
+                // 職員名
+                const nameCell = document.createElement('td');
+                nameCell.textContent = staffMember.name;
+                nameCell.style.textAlign = 'left';
+                nameCell.style.fontWeight = '500';
+                
+                // 提出情報を追加
+                let hasSubmitted = false;
+                if (monthRequests[staffMember.id]) {
+                    const submission = monthRequests[staffMember.id];
+                    if (submission.submittedAt) {
+                        hasSubmitted = true;
+                        submittedCount++;
+                        const submittedDate = new Date(submission.submittedAt);
+                        const dateStr = `${submittedDate.getMonth() + 1}/${submittedDate.getDate()} ${submittedDate.getHours()}:${String(submittedDate.getMinutes()).padStart(2, '0')}`;
+                        nameCell.title = `最終提出: ${dateStr}` + (submission.updatedCount > 0 ? ` (${submission.updatedCount}回更新)` : '');
+                        nameCell.style.color = '#27ae60';
+                    } else if (Object.keys(submission).length > 0) {
+                        hasSubmitted = true;
+                        submittedCount++;
+                        nameCell.style.color = '#27ae60';
+                    }
+                }
+                
+                if (!hasSubmitted) {
+                    nameCell.style.color = '#e74c3c';
+                    nameCell.innerHTML = staffMember.name + ' <span style="font-size: 10px;">未</span>';
+                }
+                
+                row.appendChild(nameCell);
+                
+                // 各日の希望
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const cell = document.createElement('td');
+                    cell.className = 'day-cell';
+                    const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    
+                    let requests = null;
+                    if (monthRequests[staffMember.id]) {
+                        // 新しいデータ形式と古いデータ形式の両方に対応
+                        if (monthRequests[staffMember.id].dates) {
+                            requests = monthRequests[staffMember.id].dates;
+                        } else {
+                            requests = monthRequests[staffMember.id];
+                        }
+                    }
+                    
+                    if (requests && requests[dateString]) {
+                        cell.textContent = requests[dateString];
+                        cell.className += ` cell-${requests[dateString]}`;
+                        cell.style.fontWeight = 'bold';
+                        totalRequests++;
+                    }
+                    
+                    row.appendChild(cell);
+                }
+                
+                tbody.appendChild(row);
+            });
+            
+            // 統計情報を表示
+            const statsHtml = `
+                <div style="margin-top: 20px; padding: 15px; background: #faf8f6; border-radius: 8px; border: 1px solid #e0d5c7;">
+                    <h3 style="font-size: 16px; margin-bottom: 10px;">提出統計</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold; color: #27ae60;">${submittedCount}</div>
+                            <div style="font-size: 12px; color: #666;">提出済み</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold; color: #e74c3c;">${staff.length - submittedCount}</div>
+                            <div style="font-size: 12px; color: #666;">未提出</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold; color: #3498db;">${totalRequests}</div>
+                            <div style="font-size: 12px; color: #666;">総希望数</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 統計情報をテーブルの後に追加
+            const tableContainer = document.querySelector('.admin-table-container');
+            const existingStats = document.getElementById('adminStats');
+            if (existingStats) {
+                existingStats.remove();
+            }
+            const statsDiv = document.createElement('div');
+            statsDiv.id = 'adminStats';
+            statsDiv.innerHTML = statsHtml;
+            tableContainer.insertAdjacentElement('afterend', statsDiv);
+        }
+
+        // 管理者用：前月表示
+        function showPreviousMonth() {
+            currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+            renderAdminTable();
+        }
+
+        // 管理者用：今月表示
+        function showCurrentMonth() {
+            currentMonth = new Date();
+            renderAdminTable();
+        }
+
+        // 管理者用：翌月表示
+        function showNextMonth() {
+            currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+            renderAdminTable();
+        }
+
+        // CSVエクスポート
+        function exportToCSV() {
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth() + 1;
+            const monthKey = `${year}-${String(month).padStart(2, '0')}`;
+            const allRequests = loadData();
+            const monthRequests = allRequests[monthKey] || {};
+            
+            let csv = '職員名,提出日時,更新回数';
+            
+            // ヘッダー行
+            const daysInMonth = new Date(year, month, 0).getDate();
+            for (let day = 1; day <= daysInMonth; day++) {
+                csv += `,${day}日`;
+            }
+            csv += '\n';
+            
+            // データ行
+            staff.forEach(staffMember => {
+                csv += staffMember.name;
+                
+                // 提出情報
+                let submittedInfo = ',未提出,0';
+                if (monthRequests[staffMember.id]) {
+                    const submission = monthRequests[staffMember.id];
+                    if (submission.submittedAt) {
+                        const submittedDate = new Date(submission.submittedAt);
+                        const dateStr = `${submittedDate.getMonth() + 1}/${submittedDate.getDate()} ${submittedDate.getHours()}:${String(submittedDate.getMinutes()).padStart(2, '0')}`;
+                        submittedInfo = `,${dateStr},${submission.updatedCount || 0}`;
+                    }
+                }
+                csv += submittedInfo;
+                
+                // 各日の希望
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    
+                    let request = '';
+                    if (monthRequests[staffMember.id]) {
+                        const submission = monthRequests[staffMember.id];
+                        const dates = submission.dates || submission;
+                        request = dates[dateString] || '';
+                    }
+                    
+                    csv += `,${request}`;
+                }
+                csv += '\n';
+            });
+            
+            // ダウンロード
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `shift_requests_${year}_${month}.csv`;
+            link.click();
+        }
+
+        // ログアウト
+        function logout() {
+            currentUser = null;
+            selectedDates = {};
+            selectedRequestType = null;
+            
+            // フォームをクリア
+            document.getElementById('userId').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginError').textContent = '';
+            
+            // ログイン画面に戻る
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('mainSection').classList.add('hidden');
+            document.getElementById('adminSection').classList.add('hidden');
+            document.getElementById('changePasswordSection').classList.add('hidden');
+        }
+
+        // 管理者用：職員のパスワードリセット
+        function resetStaffPassword() {
+            const staffId = document.getElementById('resetStaffSelect').value;
+            const newPassword = document.getElementById('newResetPassword').value;
+            const messageElement = document.getElementById('resetMessage');
+            
+            if (!staffId) {
+                messageElement.innerHTML = '<span style="color: #ff4444;">職員を選択してください</span>';
+                return;
+            }
+            
+            if (!/^\d{5}$/.test(newPassword)) {
+                messageElement.innerHTML = '<span style="color: #ff4444;">5桁の数字を入力してください</span>';
+                return;
+            }
+            
+            const staffMember = staff.find(s => s.id == staffId);
+            if (!staffMember) {
+                messageElement.innerHTML = '<span style="color: #ff4444;">職員が見つかりません</span>';
+                return;
+            }
+            
+            if (!confirm(`${staffMember.name}さんのパスワードを ${newPassword} にリセットしてよろしいですか？`)) {
+                return;
+            }
+            
+            // パスワードを更新
+            const passwords = loadPasswords();
+            passwords[staffId] = newPassword;
+            savePasswords(passwords);
+            
+            // 初回ログインフラグもリセット（再度変更を促すため）
+            const firstLoginFlags = loadFirstLoginFlags();
+            delete firstLoginFlags[staffId];
+            saveFirstLoginFlags(firstLoginFlags);
+            
+            messageElement.innerHTML = `<span style="color: #44bb44;">${staffMember.name}さんのパスワードをリセットしました。次回ログイン時にパスワード変更を求められます。</span>`;
+            
+            // 入力欄をクリア
+            document.getElementById('resetStaffSelect').value = '';
+            document.getElementById('newResetPassword').value = '';
+            
+            // メッセージを5秒後に消す
+            setTimeout(() => {
+                messageElement.innerHTML = '';
+            }, 5000);
+        }
+
+        // 管理者用：全職員のパスワード状況確認
+        function showPasswordStatus() {
+            const passwords = loadPasswords();
+            const firstLoginFlags = loadFirstLoginFlags();
+            
+            let html = '<h3>パスワード状況一覧</h3>';
+            html += '<table class="admin-table" style="margin-top: 15px;">';
+            html += '<thead><tr><th>ID</th><th>職員名</th><th>初期パスワード</th><th>変更済み</th><th>現在のパスワード（管理者のみ閲覧可）</th></tr></thead>';
+            html += '<tbody>';
+            
+            staff.forEach(s => {
+                const isChanged = firstLoginFlags[s.id] ? '✓' : '×';
+                const currentPassword = passwords[s.id] || s.password;
+                const isDefault = currentPassword === s.password;
+                
+                html += `<tr>`;
+                html += `<td>${s.id}</td>`;
+                html += `<td>${s.name}</td>`;
+                html += `<td>${s.password}</td>`;
+                html += `<td style="text-align: center; font-weight: bold; color: ${isChanged ? '#44bb44' : '#ff4444'}">${isChanged}</td>`;
+                html += `<td style="font-family: monospace; ${isDefault ? 'color: #999;' : 'font-weight: bold;'}">${currentPassword}</td>`;
+                html += `</tr>`;
+            });
+            
+            html += '</tbody></table>';
+            
+            // モーダル風に表示
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;';
+            modal.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 10px; max-width: 90%; max-height: 80%; overflow: auto;">
+                    ${html}
+                    <button onclick="this.parentElement.parentElement.remove()" style="margin-top: 20px;">閉じる</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Enter キーでログイン
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('password').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    login();
+                }
+            });
+            
+            // 初回ログインフラグを読み込み
+            isFirstLogin = loadFirstLoginFlags();
+        });
+    </script>
+</body>
+</html>
