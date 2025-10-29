@@ -623,7 +623,7 @@
             
             // 職員IDから「ダミーメールアドレス」を組み立てる
             // ★★★ ここの 'app.com' の部分はあなたが決めたものにしてください ★★★
-            const email = `${userId}@app.com`; // 例: '1' と入力されたら '1@app.com' になる
+            const email = `${userId}@7w.com`; // 例: '1' と入力されたら '1@app.com' になる
 
             loginButton.disabled = true;
             loginButton.textContent = 'ログイン中...';
@@ -677,8 +677,8 @@
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
 
-            if (!/^\d{5}$/.test(newPassword)) {
-                document.getElementById('passwordError').textContent = '5桁の数字を入力してください';
+            if (!/^\d{6}$/.test(newPassword)) {
+                document.getElementById('passwordError').textContent = '6桁の数字を入力してください';
                 return;
             }
             if (newPassword !== confirmPassword) {
