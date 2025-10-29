@@ -389,9 +389,8 @@
             background: #FF9800;
         }
     </style>
-</head>
+    </head>
 <body>
-    <!-- 初期ローディング -->
     <div id="loadingSection" class="container">
         <div class="loading">
             <p>システムを初期化中...</p>
@@ -399,7 +398,6 @@
         </div>
     </div>
 
-    <!-- ログイン画面 -->
     <div id="loginSection" class="container login-container hidden">
         <h1>シフト希望管理システム</h1>
         <div class="form-group">
@@ -407,8 +405,8 @@
             <input type="text" id="userId" placeholder="IDを入力">
         </div>
         <div class="form-group">
-            <label for="password">パスワード (5桁の数字)</label>
-            <input type="password" id="password" placeholder="パスワードを入力" maxlength="5">
+            <label for="password">パスワード</label>
+            <input type="password" id="password" placeholder="パスワードを入力">
         </div>
         <button onclick="login()" id="loginButton">ログイン</button>
         <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 4px; font-size: 12px; color: #666; line-height: 1.6;">
@@ -418,7 +416,6 @@
         <div id="loginError" class="error-message"></div>
     </div>
 
-    <!-- パスワード変更画面 -->
     <div id="changePasswordSection" class="container login-container hidden">
         <h2>初回ログイン - パスワード変更</h2>
         <p style="margin-bottom: 20px;">新しいパスワード（5桁の数字）を設定してください</p>
@@ -434,7 +431,6 @@
         <div id="passwordError" class="error-message"></div>
     </div>
 
-    <!-- メイン画面 -->
     <div id="mainSection" class="container hidden">
         <h1>シフト希望入力</h1>
         <div id="welcomeMessage" style="text-align: center; margin-bottom: 20px;"></div>
@@ -450,7 +446,6 @@
             <button onclick="nextMonth()">翌月</button>
         </div>
 
-        <!-- カレンダー表示エリア -->
         <div id="calendar"></div>
 
         <div class="request-buttons">
@@ -484,7 +479,6 @@
         <div id="submitMessage" style="margin-top: 10px;"></div>
     </div>
 
-    <!-- 管理者画面 -->
     <div id="adminSection" class="container hidden">
         <h1>管理者画面</h1>
         
@@ -507,129 +501,73 @@
 
         <button onclick="exportToCSV()" style="margin-top: 20px;">CSVエクスポート</button>
         
-        <!-- パスワードリセット機能 -->
-        <div style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 4px;">
-            <h3 style="font-size: 16px; margin-bottom: 15px;">パスワードリセット</h3>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <select id="resetStaffSelect" style="flex: 1; padding: 8px;">
-                    <option value="">職員を選択してください</option>
-                </select>
-                <button onclick="resetStaffPassword()" style="width: auto; padding: 8px 20px; background: #ff9800;">初期パスワードにリセット</button>
-            </div>
-            <div id="resetMessage" style="margin-top: 10px; font-size: 14px;"></div>
-        </div>
-
-        <!-- 管理者パスワード変更 -->
-        <div style="margin-top: 20px; padding: 20px; background: #f9f9f9; border-radius: 4px;">
-            <h3 style="font-size: 16px; margin-bottom: 15px;">管理者パスワード変更</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <input type="password" id="adminNewPassword" placeholder="新しいパスワード（5桁）" maxlength="5">
-                <input type="password" id="adminConfirmPassword" placeholder="パスワード確認（5桁）" maxlength="5">
-            </div>
-            <button onclick="changeAdminPassword()" style="margin-top: 10px; width: 200px;">パスワード変更</button>
-            <div id="adminPasswordMessage" style="margin-top: 10px; font-size: 14px;"></div>
+        <div style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 4px; font-size: 13px; color: #333;">
+            <h3 style="font-size: 16px; margin-bottom: 15px;">🔒 職員のパスワードリセット</h3>
+            <p>
+                職員がパスワードを忘れた場合は、
+                <strong>Firebaseコンソールの「Authentication」</strong>
+                画面から、該当の職員（例: 1@app.com）のパスワードをリセットしてください。
+            </p>
         </div>
         
         <button onclick="logout()" class="logout-button">ログアウト</button>
     </div>
 
-    <!-- 同期状態表示 -->
     <div id="syncStatus" class="sync-status hidden">
         <span id="syncText">オンライン</span>
     </div>
 
     <script>
         // ============================================
-        // Firebaseの設定を外部から読み込み
+        // Firebaseの設定を外部から読み込み (変更なし)
         // ============================================
         let firebaseConfig = null;
-        let db = null;
+        let auth = null;      // 認証用
+        let firestore = null; // Firestore DB用
+        let db = null;        // (互換性のため残す) Realtime DB用
 
-        // LocalStorageから設定を読み込み
         function loadFirebaseConfig() {
             const savedConfig = localStorage.getItem('firebaseConfig');
             if (!savedConfig) {
-                // 設定がない場合は設定画面へリダイレクト
                 alert('Firebaseの設定が必要です。設定画面へ移動します。');
                 window.location.href = 'firebase-config.html';
                 return false;
             }
-            
             try {
                 firebaseConfig = JSON.parse(savedConfig);
                 return true;
             } catch (error) {
-                alert('設定の読み込みに失敗しました。設定をやり直してください。');
+                alert('設定の読み込みに失敗しました。');
                 localStorage.removeItem('firebaseConfig');
                 window.location.href = 'firebase-config.html';
                 return false;
             }
         }
 
-        // Firebase初期化
+        // Firebase初期化 (AuthとFirestoreを追加)
         function initializeFirebase() {
             if (!loadFirebaseConfig()) {
                 return false;
             }
-
             try {
                 firebase.initializeApp(firebaseConfig);
-                db = firebase.database();
-                console.log('Firebase初期化成功');
+                auth = firebase.auth();
+                firestore = firebase.firestore();
+                db = firebase.database(); // 元のコードが使っているなら残す
+                console.log('Firebase初期化成功 (Auth, Firestore)');
                 return true;
             } catch (error) {
                 console.error('Firebase初期化エラー:', error);
                 alert('システムの初期化に失敗しました。設定を確認してください。');
-                
-                // 設定をクリアして再設定画面へ
-                if (confirm('設定をリセットして再設定しますか？')) {
-                    localStorage.clear();
-                    window.location.href = 'firebase-config.html';
-                }
                 return false;
             }
         }
 
         // ============================================
-        // グローバル変数と定数
+        // グローバル変数
         // ============================================
         
-        // 職員データ
-        const staff = [
-            {id: 1, name: '長坂', password: '12345'},
-            {id: 2, name: '中里', password: '23456'},
-            {id: 3, name: '渥美', password: '34567'},
-            {id: 4, name: '田中', password: '45678'},
-            {id: 5, name: '三浦', password: '56789'},
-            {id: 6, name: '小飯塚', password: '67890'},
-            {id: 7, name: '岡野', password: '78901'},
-            {id: 8, name: '山梨', password: '89012'},
-            {id: 9, name: '中村', password: '90123'},
-            {id: 10, name: '加瀬', password: '01234'},
-            {id: 11, name: '石沢', password: '11223'},
-            {id: 12, name: '佐藤', password: '22334'},
-            {id: 13, name: '蔵元', password: '33445'},
-            {id: 14, name: '青島', password: '44556'},
-            {id: 15, name: '中垣', password: '55667'},
-            {id: 16, name: '長田', password: '66778'},
-            {id: 17, name: '圷', password: '77889'},
-            {id: 18, name: '井清', password: '88990'},
-            {id: 19, name: '山本', password: '99001'},
-            {id: 20, name: '田端', password: '00112'},
-            {id: 21, name: '竹鼻', password: '11234'},
-            {id: 22, name: '新垣', password: '22345'},
-            {id: 23, name: '熊谷', password: '33456'},
-            {id: 24, name: '岩井', password: '44567'},
-            {id: 25, name: '相良', password: '55678'},
-            {id: 26, name: '高橋', password: '66789'},
-            {id: 27, name: '白井', password: '77890'},
-            {id: 28, name: '今野', password: '88901'},
-            {id: 29, name: '和田', password: '99012'},
-            {id: 30, name: '村上', password: '00123'}
-        ];
-
-        const leaders = [3, 4, 5, 6, 7, 9, 10, 17, 18, 19, 20, 21, 22, 23, 25];
-        const DEFAULT_ADMIN_PASSWORD = '99999';
+        // 🚨 危険な職員リストとパスワードの配列は「完全に削除」しました
 
         // 祝日データ
         const holidays = {
@@ -665,105 +603,17 @@
         };
 
         // 状態管理
-        let currentUser = null;
+        let currentUser = null; // { uid: '...', name: '長坂', originalId: 1, ... } の形式で保存
         let currentMonth = new Date();
         let selectedDates = {};
         let selectedRequestType = null;
-        let allRequests = {};
-        let passwords = {};
-        let adminPassword = DEFAULT_ADMIN_PASSWORD;
-
-        // ============================================
-        // Firebase データ操作
-        // ============================================
         
-        // データ読み込み
-        async function loadFromFirebase() {
-            try {
-                // 希望データ読み込み
-                const requestsSnapshot = await db.ref('requests').once('value');
-                allRequests = requestsSnapshot.val() || {};
-                
-                // パスワードデータ読み込み
-                const passwordsSnapshot = await db.ref('passwords').once('value');
-                const fbPasswords = passwordsSnapshot.val() || {};
-                
-                // 初期パスワード設定
-                passwords = {};
-                staff.forEach(s => {
-                    passwords[s.id] = fbPasswords[s.id] || s.password;
-                });
-                
-                // 管理者パスワード読み込み
-                const adminSnapshot = await db.ref('adminPassword').once('value');
-                adminPassword = adminSnapshot.val() || DEFAULT_ADMIN_PASSWORD;
-                
-                console.log('Firebaseからデータ読み込み完了');
-            } catch (error) {
-                console.error('Firebase読み込みエラー:', error);
-                throw error;
-            }
-        }
-
-        // 希望データ保存
-        async function saveRequestsToFirebase(monthKey, staffId, data) {
-            try {
-                await db.ref(`requests/${monthKey}/${staffId}`).set(data);
-                console.log('希望データ保存完了:', monthKey, staffId);
-            } catch (error) {
-                console.error('希望データ保存エラー:', error);
-                throw error;
-            }
-        }
-
-        // パスワード保存
-        async function savePasswordToFirebase(staffId, password) {
-            try {
-                await db.ref(`passwords/${staffId}`).set(password);
-                console.log('パスワード保存完了:', staffId);
-            } catch (error) {
-                console.error('パスワード保存エラー:', error);
-                throw error;
-            }
-        }
-
-        // 管理者パスワード保存
-        async function saveAdminPasswordToFirebase(password) {
-            try {
-                await db.ref('adminPassword').set(password);
-                console.log('管理者パスワード保存完了');
-            } catch (error) {
-                console.error('管理者パスワード保存エラー:', error);
-                throw error;
-            }
-        }
-
-        // リアルタイム同期設定
-        function setupRealtimeSync() {
-            // 希望データのリアルタイム同期
-            db.ref('requests').on('value', (snapshot) => {
-                allRequests = snapshot.val() || {};
-                console.log('希望データ更新');
-                
-                // 現在の画面を更新
-                if (currentUser) {
-                    if (currentUser.id === 'admin') {
-                        renderAdminTable();
-                    } else {
-                        updateSubmissionStatus();
-                    }
-                }
-            });
-            
-            // オンライン/オフライン状態
-            db.ref('.info/connected').on('value', (snapshot) => {
-                const connected = snapshot.val();
-                updateSyncStatus(connected ? 'online' : 'offline');
-            });
-        }
+        // Admin用
+        let staffListForAdmin = []; // 管理者画面で使う職員リスト
+        let allRequestsForAdmin = {}; // 管理者画面で使う希望データ
 
         // ============================================
-        // ログイン関連
+        // ログイン関連 (🚨 完全に新しいロジック)
         // ============================================
         
         async function login() {
@@ -771,40 +621,58 @@
             const password = document.getElementById('password').value;
             const loginButton = document.getElementById('loginButton');
             
+            // 職員IDから「ダミーメールアドレス」を組み立てる
+            // ★★★ ここの 'app.com' の部分はあなたが決めたものにしてください ★★★
+            const email = `${userId}@app.com`; // 例: '1' と入力されたら '1@app.com' になる
+
             loginButton.disabled = true;
             loginButton.textContent = 'ログイン中...';
             
             try {
-                // 最新データを取得
-                await loadFromFirebase();
-                
-                if (userId === 'admin' && password === adminPassword) {
-                    currentUser = {id: 'admin', name: '管理者'};
-                    showAdminSection();
+                // 1. Firebase Authenticationでログイン
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // 2. Firestoreから職員名簿を取得
+                const staffDoc = await firestore.collection('staff').doc(user.uid).get();
+
+                if (!staffDoc.exists) {
+                    throw new Error('職員名簿に情報が見つかりません。');
+                }
+
+                currentUser = {
+                    uid: user.uid,
+                    ...staffDoc.data()
+                };
+
+                // 3. 初回パスワード変更チェック
+                if (currentUser.passwordChanged === false) {
+                    // 初回ログイン -> パスワード変更画面へ
+                    showChangePasswordSection();
                 } else {
-                    const staffMember = staff.find(s => s.id == userId);
-                    if (staffMember && passwords[staffMember.id] === password) {
-                        currentUser = staffMember;
-                        
-                        // 初回ログインチェック
-                        if (passwords[staffMember.id] === staffMember.password) {
-                            showChangePasswordSection();
-                        } else {
-                            showMainSection();
-                        }
+                    // 通常ログイン
+                    // Firestoreのstaff名簿に isAdmin: true を持たせておく
+                    if (currentUser.isAdmin === true) { 
+                        showAdminSection();
                     } else {
-                        document.getElementById('loginError').textContent = 'IDまたはパスワードが正しくありません';
+                        showMainSection();
                     }
                 }
+
             } catch (error) {
-                document.getElementById('loginError').textContent = 'ログインエラー: ' + error.message;
+                console.error('ログインエラー:', error);
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                    document.getElementById('loginError').textContent = 'IDまたはパスワードが正しくありません';
+                } else {
+                    document.getElementById('loginError').textContent = 'ログインに失敗しました: ' + error.message;
+                }
             } finally {
                 loginButton.disabled = false;
                 loginButton.textContent = 'ログイン';
             }
         }
 
-        // パスワード変更
+        // パスワード変更 (🚨 完全に新しいロジック)
         async function changePassword() {
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
@@ -813,99 +681,69 @@
                 document.getElementById('passwordError').textContent = '5桁の数字を入力してください';
                 return;
             }
-
             if (newPassword !== confirmPassword) {
                 document.getElementById('passwordError').textContent = 'パスワードが一致しません';
                 return;
             }
 
             try {
-                await savePasswordToFirebase(currentUser.id, newPassword);
-                passwords[currentUser.id] = newPassword;
-                showMainSection();
+                const user = auth.currentUser;
+                if (!user) {
+                    throw new Error('ユーザーがログインしていません');
+                }
+
+                // 1. Authのパスワードを更新
+                await user.updatePassword(newPassword);
+
+                // 2. Firestoreのフラグを更新
+                await firestore.collection('staff').doc(user.uid).update({
+                    passwordChanged: true
+                });
+
+                // 3. メイン画面へ
+                alert('パスワードが変更されました。');
+                
+                // currentUserにも反映
+                currentUser.passwordChanged = true;
+
+                if (currentUser.isAdmin === true) {
+                    showAdminSection();
+                } else {
+                    showMainSection();
+                }
+
             } catch (error) {
-                document.getElementById('passwordError').textContent = 'パスワード変更エラー: ' + error.message;
+                console.error('パスワード変更エラー:', error);
+                document.getElementById('passwordError').textContent = '変更エラー: ' + error.message;
             }
         }
 
-        // 管理者パスワード変更
-        async function changeAdminPassword() {
-            const newPassword = document.getElementById('adminNewPassword').value;
-            const confirmPassword = document.getElementById('adminConfirmPassword').value;
-            
-            if (!/^\d{5}$/.test(newPassword)) {
-                document.getElementById('adminPasswordMessage').innerHTML = 
-                    '<span style="color: red;">5桁の数字を入力してください</span>';
-                return;
-            }
-            
-            if (newPassword !== confirmPassword) {
-                document.getElementById('adminPasswordMessage').innerHTML = 
-                    '<span style="color: red;">パスワードが一致しません</span>';
-                return;
-            }
-            
+        // ログアウト (🚨 Authのログアウトを追加)
+        async function logout() {
             try {
-                await saveAdminPasswordToFirebase(newPassword);
-                adminPassword = newPassword;
-                
-                document.getElementById('adminPasswordMessage').innerHTML = 
-                    '<span style="color: green;">管理者パスワードを変更しました</span>';
-                
-                document.getElementById('adminNewPassword').value = '';
-                document.getElementById('adminConfirmPassword').value = '';
-                
-                setTimeout(() => {
-                    document.getElementById('adminPasswordMessage').innerHTML = '';
-                }, 3000);
+                await auth.signOut();
             } catch (error) {
-                document.getElementById('adminPasswordMessage').innerHTML = 
-                    '<span style="color: red;">変更エラー: ' + error.message + '</span>';
+                console.error('ログアウトエラー:', error);
             }
+            
+            currentUser = null;
+            selectedDates = {};
+            selectedRequestType = null;
+            
+            document.getElementById('userId').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginError').textContent = '';
+            
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('mainSection').classList.add('hidden');
+            document.getElementById('adminSection').classList.add('hidden');
+            document.getElementById('changePasswordSection').classList.add('hidden');
+            document.getElementById('syncStatus').classList.add('hidden');
         }
 
-        // パスワードリセット
-        async function resetStaffPassword() {
-            const staffId = document.getElementById('resetStaffSelect').value;
-            
-            if (!staffId) {
-                document.getElementById('resetMessage').innerHTML = 
-                    '<span style="color: red;">職員を選択してください</span>';
-                return;
-            }
-            
-            const staffMember = staff.find(s => s.id == staffId);
-            if (!staffMember) {
-                document.getElementById('resetMessage').innerHTML = 
-                    '<span style="color: red;">職員が見つかりません</span>';
-                return;
-            }
-            
-            if (!confirm(staffMember.name + 'さんのパスワードを初期パスワード（' + staffMember.password + '）にリセットしますか？')) {
-                return;
-            }
-            
-            try {
-                await savePasswordToFirebase(staffId, staffMember.password);
-                passwords[staffId] = staffMember.password;
-                
-                document.getElementById('resetMessage').innerHTML = 
-                    '<span style="color: green;">' + staffMember.name + 'さんのパスワードを初期値にリセットしました。<br>' +
-                    '初期パスワード: ' + staffMember.password + '</span>';
-                
-                document.getElementById('resetStaffSelect').value = '';
-                
-                setTimeout(() => {
-                    document.getElementById('resetMessage').innerHTML = '';
-                }, 5000);
-            } catch (error) {
-                document.getElementById('resetMessage').innerHTML = 
-                    '<span style="color: red;">リセットエラー: ' + error.message + '</span>';
-            }
-        }
 
         // ============================================
-        // 画面表示
+        // 画面表示 (ロジックはほぼ変更なし)
         // ============================================
         
         function showChangePasswordSection() {
@@ -913,9 +751,7 @@
             document.getElementById('changePasswordSection').classList.remove('hidden');
         }
 
-        function showMainSection() {
-            console.log('メイン画面表示開始');
-            
+        async function showMainSection() {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('changePasswordSection').classList.add('hidden');
             document.getElementById('adminSection').classList.add('hidden');
@@ -925,36 +761,31 @@
             document.getElementById('welcomeMessage').textContent = currentUser.name + 'さん、こんにちは';
             
             setTargetMonth();
-            renderCalendar();
             startCountdown();
-            loadUserRequests();
-            updateSubmissionStatus();
             
-            console.log('メイン画面表示完了');
+            // Firestoreからデータを読み込む
+            await loadUserRequests();
+            // 読み込んだ後にカレンダーを描画
+            renderCalendar(); 
+            
+            // 提出状況を更新 (Firestoreから)
+            await updateSubmissionStatus();
         }
 
-        function showAdminSection() {
+        async function showAdminSection() {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('mainSection').classList.add('hidden');
             document.getElementById('adminSection').classList.remove('hidden');
             document.getElementById('syncStatus').classList.remove('hidden');
             
-            // 職員選択リストを初期化
-            const selectElement = document.getElementById('resetStaffSelect');
-            selectElement.innerHTML = '<option value="">職員を選択してください</option>';
-            staff.forEach(s => {
-                const option = document.createElement('option');
-                option.value = s.id;
-                option.textContent = s.id + '. ' + s.name;
-                selectElement.appendChild(option);
-            });
-            
             currentMonth = new Date();
-            renderAdminTable();
+            
+            // 管理者テーブルを描画 (Firestoreから)
+            await renderAdminTable();
         }
 
         // ============================================
-        // カレンダー関連
+        // カレンダー関連 (ロジックはほぼ変更なし)
         // ============================================
         
         function setTargetMonth() {
@@ -1063,7 +894,7 @@
         }
 
         // ============================================
-        // 希望管理
+        // 希望管理 (一部変更あり)
         // ============================================
         
         function setRequestType(type) {
@@ -1108,7 +939,7 @@
                 item.className = 'selected-date-item';
                 item.innerHTML = 
                     '<span>' + date + ' - ' + selectedDates[date] + '</span>' +
-                    '<button onclick="removeDate(\'' + date + '\')" style="width: auto; padding: 5px 15px;">削除</button>';
+                    '<button onclick="removeDate(\'' + date + '\')" style="width: auto; padding: 5px 15px; background: #f44336;">削除</button>';
                 list.appendChild(item);
             });
         }
@@ -1119,105 +950,8 @@
             updateSelectedDatesList();
         }
 
-        function loadUserRequests() {
-            const year = currentMonth.getFullYear();
-            const month = currentMonth.getMonth() + 1;
-            const monthKey = year + '-' + String(month).padStart(2, '0');
-            
-            if (allRequests[monthKey] && allRequests[monthKey][currentUser.id]) {
-                const submission = allRequests[monthKey][currentUser.id];
-                selectedDates = submission.dates || submission;
-                renderCalendar();
-                updateSelectedDatesList();
-            }
-        }
-
-        async function submitRequests() {
-            if (Object.keys(selectedDates).length === 0) {
-                alert('希望する日付を選択してください');
-                return;
-            }
-            
-            const year = currentMonth.getFullYear();
-            const month = currentMonth.getMonth() + 1;
-            const monthKey = year + '-' + String(month).padStart(2, '0');
-            
-            const isUpdate = allRequests[monthKey] && allRequests[monthKey][currentUser.id];
-            
-            if (isUpdate && !confirm('既に提出済みの希望があります。上書きしてもよろしいですか？')) {
-                return;
-            }
-            
-            const submitButton = document.getElementById('submitButton');
-            submitButton.disabled = true;
-            submitButton.textContent = '送信中...';
-            
-            try {
-                const data = {
-                    dates: selectedDates,
-                    submittedAt: new Date().toISOString(),
-                    staffName: currentUser.name
-                };
-                
-                await saveRequestsToFirebase(monthKey, currentUser.id, data);
-                
-                // ローカル更新
-                if (!allRequests[monthKey]) {
-                    allRequests[monthKey] = {};
-                }
-                allRequests[monthKey][currentUser.id] = data;
-                
-                document.getElementById('submitMessage').innerHTML = 
-                    '<span class="success-message">希望が提出されました！</span>';
-                
-                updateSubmissionStatus();
-                
-                setTimeout(() => {
-                    document.getElementById('submitMessage').innerHTML = '';
-                }, 3000);
-            } catch (error) {
-                document.getElementById('submitMessage').innerHTML = 
-                    '<span class="error-message">提出エラー: ' + error.message + '</span>';
-            } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = '希望を提出';
-            }
-        }
-
-        function updateSubmissionStatus() {
-            const year = currentMonth.getFullYear();
-            const month = currentMonth.getMonth() + 1;
-            const monthKey = year + '-' + String(month).padStart(2, '0');
-            
-            const monthRequests = allRequests[monthKey] || {};
-            
-            const submitted = [];
-            const notSubmitted = [];
-            
-            staff.forEach(s => {
-                if (monthRequests[s.id]) {
-                    submitted.push(s.name);
-                } else {
-                    notSubmitted.push(s.name);
-                }
-            });
-            
-            const percentage = Math.round((submitted.length / staff.length) * 100);
-            
-            document.getElementById('submissionStatusContent').innerHTML = 
-                '<div style="background: #e8f5e9; padding: 10px; border-radius: 4px; margin-bottom: 10px;">' +
-                '<strong>提出済み (' + submitted.length + '名):</strong> ' + 
-                (submitted.length > 0 ? submitted.join('、') : 'なし') +
-                '</div>' +
-                '<div style="background: #ffebee; padding: 10px; border-radius: 4px;">' +
-                '<strong>未提出 (' + notSubmitted.length + '名):</strong> ' + 
-                (notSubmitted.length > 0 ? notSubmitted.join('、') : 'なし') +
-                '</div>' +
-                '<div style="margin-top: 10px; text-align: center;">提出率: ' + percentage + '%</div>';
-        }
-
         // ============================================
-        // タイマー
+        // タイマー (変更なし)
         // ============================================
         
         function startCountdown() {
@@ -1255,126 +989,278 @@
         }
 
         // ============================================
-        // 管理者機能
+        // 希望管理 (🚨 Firestore版に書き換え)
+        // ============================================
+
+        // データをFirestoreに保存
+        async function saveRequestsToFirebase(monthKey, staffUid, data) {
+            try {
+                // ドキュメント: {YYYY-MM}
+                // フィールド: { uid: data, uid2: data2 }
+                // set + merge:true で、指定したUIDのデータだけを上書き
+                const docRef = firestore.collection('requests').doc(monthKey);
+                await docRef.set({
+                    [staffUid]: data
+                }, { merge: true });
+                
+                console.log('希望データ保存完了:', monthKey, staffUid);
+            } catch (error) {
+                console.error('希望データ保存エラー:', error);
+                throw error;
+            }
+        }
+
+        // 自分の希望データをFirestoreから読み込む
+        async function loadUserRequests() {
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth() + 1;
+            const monthKey = year + '-' + String(month).padStart(2, '0');
+            
+            try {
+                const doc = await firestore.collection('requests').doc(monthKey).get();
+                
+                if (doc.exists && doc.data()[currentUser.uid]) {
+                    const submission = doc.data()[currentUser.uid];
+                    selectedDates = submission.dates || {};
+                } else {
+                    selectedDates = {}; // データがない場合はクリア
+                }
+            } catch (error) {
+                console.error("希望の読み込みエラー:", error);
+                selectedDates = {};
+            }
+            
+            // 読み込んだらリストも更新
+            updateSelectedDatesList();
+        }
+
+        // 希望を提出 (🚨 Firestore版)
+        async function submitRequests() {
+            if (Object.keys(selectedDates).length === 0) {
+                if (!confirm('希望が選択されていません。空の希望（希望なし）として提出しますか？')) {
+                    return;
+                }
+            }
+            
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth() + 1;
+            const monthKey = year + '-' + String(month).padStart(2, '0');
+            
+            if (confirm('この内容で希望を提出しますか？ (提出後は上書きも可能です)') == false) {
+                return;
+            }
+            
+            const submitButton = document.getElementById('submitButton');
+            submitButton.disabled = true;
+            submitButton.textContent = '送信中...';
+            
+            try {
+                const data = {
+                    dates: selectedDates,
+                    submittedAt: new Date().toISOString(),
+                    staffName: currentUser.name,
+                    originalId: currentUser.originalId // originalIdも保存
+                };
+                
+                await saveRequestsToFirebase(monthKey, currentUser.uid, data);
+                
+                document.getElementById('submitMessage').innerHTML = 
+                    '<span class="success-message">希望が提出されました！</span>';
+                
+                // 提出状況を更新
+                await updateSubmissionStatus();
+
+                setTimeout(() => {
+                    document.getElementById('submitMessage').innerHTML = '';
+                }, 3000);
+
+            } catch (error) {
+                 document.getElementById('submitMessage').innerHTML = 
+                    '<span class="error-message">提出エラー: ' + error.message + '</span>';
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = '希望を提出';
+            }
+        }
+
+        // 提出状況の表示 (🚨 Firestore版)
+        async function updateSubmissionStatus() {
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth() + 1;
+            const monthKey = year + '-' + String(month).padStart(2, '0');
+
+            try {
+                // 1. 全職員のリストを取得 (管理者でなくても取得が必要)
+                //    Firestoreの 'staff' コレクションから 'isAdmin' が false の人だけ取得
+                const staffSnapshot = await firestore.collection('staff')
+                    .where('isAdmin', '!=', true) // isAdminがtrueでない人（職員）
+                    .get();
+                
+                const allStaff = staffSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
+                
+                // 2. その月の希望データを取得
+                const requestsDoc = await firestore.collection('requests').doc(monthKey).get();
+                const monthRequests = requestsDoc.exists ? requestsDoc.data() : {};
+
+                const submitted = [];
+                const notSubmitted = [];
+
+                for (const staff of allStaff) {
+                    if (monthRequests[staff.uid]) {
+                        submitted.push(staff.name);
+                    } else {
+                        notSubmitted.push(staff.name);
+                    }
+                }
+                
+                const totalStaff = allStaff.length;
+                const percentage = (totalStaff > 0) ? Math.round((submitted.length / totalStaff) * 100) : 0;
+                
+                document.getElementById('submissionStatusContent').innerHTML = 
+                   '<div style="background: #e8f5e9; padding: 10px; border-radius: 4px; margin-bottom: 10px;">' +
+                   '<strong>提出済み (' + submitted.length + '名):</strong> ' + 
+                   (submitted.length > 0 ? submitted.join('、') : 'なし') +
+                   '</div>' +
+                   '<div style="background: #ffebee; padding: 10px; border-radius: 4px;">' +
+                   '<strong>未提出 (' + notSubmitted.length + '名):</strong> ' + 
+                   (notSubmitted.length > 0 ? notSubmitted.join('、') : 'なし') +
+                   '</div>' +
+                   '<div style="margin-top: 10px; text-align: center;">提出率: ' + percentage + '% (' + submitted.length + '/' + totalStaff + ')</div>';
+
+            } catch (error) {
+                console.error("提出状況の取得エラー:", error);
+                document.getElementById('submissionStatusContent').innerHTML = 
+                    '<span style="color: red;">提出状況の取得に失敗しました</span>';
+            }
+        }
+
+        // カレンダー月移動ボタン (変更なし)
+        function previousMonth() {
+            alert('前月の希望入力期間は終了しています');
+        }
+
+        function nextMonth() {
+            alert('翌月の希望入力期間はまだ開始されていません');
+        }
+
+
+        // ============================================
+        // 管理者機能 (🚨 Firestore版に書き換え)
         // ============================================
         
-        function renderAdminTable() {
+        async function renderAdminTable() {
             const year = currentMonth.getFullYear();
             const month = currentMonth.getMonth() + 1;
             const monthKey = year + '-' + String(month).padStart(2, '0');
             
             document.getElementById('adminMonth').textContent = year + '年' + month + '月の希望一覧';
             
-            const monthRequests = allRequests[monthKey] || {};
-            
-            const header = document.getElementById('adminTableHeader');
-            header.innerHTML = '<th>ID</th><th>チーム</th><th>職員名</th>';
-            
-            const daysInMonth = new Date(year, month, 0).getDate();
-            for (let day = 1; day <= daysInMonth; day++) {
-                header.innerHTML += '<th>' + day + '</th>';
-            }
-            
-            const tbody = document.getElementById('adminTableBody');
-            tbody.innerHTML = '';
-            
-            staff.forEach(staffMember => {
-                let row = '<tr>';
+            try {
+                // 1. 全職員のリストを取得
+                const staffSnapshot = await firestore.collection('staff')
+                    .orderBy('originalId', 'asc') // originalIdで並び替え
+                    .get();
+                staffListForAdmin = staffSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
+
+                // 2. その月の希望データを取得
+                const requestsDoc = await firestore.collection('requests').doc(monthKey).get();
+                allRequestsForAdmin = requestsDoc.exists ? requestsDoc.data() : {};
                 
-                row += '<td>' + staffMember.id + '</td>';
-                
-                let team = '';
-                if (staffMember.id >= 3 && staffMember.id <= 16) {
-                    team = 'A';
-                } else if (staffMember.id >= 17 && staffMember.id <= 30) {
-                    team = 'B';
-                }
-                row += '<td>' + team + '</td>';
-                
-                let nameDisplay = staffMember.name;
-                if (leaders.includes(staffMember.id)) {
-                    nameDisplay += ' <span style="color: #ff9800; font-weight: bold;">L</span>';
-                }
-                row += '<td>' + nameDisplay + '</td>';
-                
+                // 3. テーブルヘッダーを描画 (変更なし)
+                const header = document.getElementById('adminTableHeader');
+                header.innerHTML = '<th>ID</th><th>チーム</th><th>職員名</th>';
+                const daysInMonth = new Date(year, month, 0).getDate();
                 for (let day = 1; day <= daysInMonth; day++) {
-                    const dateString = year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+                    header.innerHTML += '<th>' + day + '</th>';
+                }
+
+                // 4. テーブルボディを描画
+                const tbody = document.getElementById('adminTableBody');
+                tbody.innerHTML = '';
+                
+                for (const staffMember of staffListForAdmin) {
+                    if (staffMember.isAdmin) continue; // 管理者は一覧から除外
+
+                    let row = '<tr>';
+                    row += `<td>${staffMember.originalId || ''}</td>`;
+                    row += `<td>${staffMember.team || ''}</td>`; // Firestoreに 'team' フィールドを持たせる
                     
-                    let cellContent = '';
-                    let cellStyle = '';
-                    if (monthRequests[staffMember.id]) {
-                        const dates = monthRequests[staffMember.id].dates || monthRequests[staffMember.id];
-                        if (dates[dateString]) {
-                            cellContent = dates[dateString];
-                            switch(cellContent) {
-                                case '休': cellStyle = 'background: #ffebee;'; break;
-                                case '年': cellStyle = 'background: #e3f2fd;'; break;
-                                case '出': cellStyle = 'background: #fff3e0;'; break;
-                                case '日': cellStyle = 'background: #e8f5e9;'; break;
-                            }
+                    let nameDisplay = staffMember.name;
+                    if (staffMember.leader) { // Firestoreに 'leader' フィールドを持たせる
+                        nameDisplay += ' <span style="color: #ff9800; font-weight: bold;">L</span>';
+                    }
+                    row += `<td>${nameDisplay}</td>`;
+
+                    // 希望データを描画
+                    const staffRequestData = allRequestsForAdmin[staffMember.uid];
+                    const dates = staffRequestData ? staffRequestData.dates : {};
+
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        const dateString = year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+                        const cellContent = dates[dateString] || '';
+                        let cellStyle = '';
+                        // セルの色分け
+                        switch(cellContent) {
+                            case '休': cellStyle = 'background: #ffebee;'; break;
+                            case '年': cellStyle = 'background: #e3f2fd;'; break;
+                            case '出': cellStyle = 'background: #fff3e0;'; break;
+                            case '日': cellStyle = 'background: #e8f5e9;'; break;
                         }
+                        row += `<td style="${cellStyle}">${cellContent}</td>`;
                     }
                     
-                    row += '<td style="' + cellStyle + '">' + cellContent + '</td>';
+                    row += '</tr>';
+                    tbody.innerHTML += row;
                 }
-                
-                row += '</tr>';
-                tbody.innerHTML += row;
-            });
+
+            } catch (error) {
+                console.error("管理者テーブルの描画エラー:", error);
+                document.getElementById('adminTableBody').innerHTML = 
+                    `<tr><td colspan="34" style="color: red;">データ取得エラー: ${error.message}</td></tr>`;
+            }
         }
 
-        function showPreviousMonth() {
+        // 管理者 月移動
+        async function showPreviousMonth() {
             currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
-            renderAdminTable();
+            await renderAdminTable();
         }
-
-        function showCurrentMonth() {
+        async function showCurrentMonth() {
             currentMonth = new Date();
-            renderAdminTable();
+            await renderAdminTable();
         }
-
-        function showNextMonth() {
+        async function showNextMonth() {
             currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
-            renderAdminTable();
+            await renderAdminTable();
         }
 
+        // CSVエクスポート (🚨 Firestoreの変数を使うように変更)
         function exportToCSV() {
             const year = currentMonth.getFullYear();
             const month = currentMonth.getMonth() + 1;
-            const monthKey = year + '-' + String(month).padStart(2, '0');
-            const monthRequests = allRequests[monthKey] || {};
             
             let csv = 'ID,チーム,職員名';
             const daysInMonth = new Date(year, month, 0).getDate();
-            for (let day = 1; day <= daysInMonth; day++) {
-                csv += ',' + day + '日';
-            }
+            for (let day = 1; day <= daysInMonth; day++) { csv += ',' + day + '日'; }
             csv += '\n';
             
-            staff.forEach(staffMember => {
-                csv += staffMember.id;
+            // staffListForAdmin と allRequestsForAdmin を使う
+            staffListForAdmin.forEach(staffMember => {
+                if (staffMember.isAdmin) return;
+
+                csv += `${staffMember.originalId || ''},`;
+                csv += `${staffMember.team || ''},`;
                 
-                if (staffMember.id >= 3 && staffMember.id <= 16) {
-                    csv += ',A';
-                } else if (staffMember.id >= 17 && staffMember.id <= 30) {
-                    csv += ',B';
-                } else {
-                    csv += ',';
-                }
-                
-                csv += ',' + staffMember.name;
-                if (leaders.includes(staffMember.id)) {
-                    csv += '(L)';
-                }
+                let name = staffMember.name;
+                if (staffMember.leader) { name += '(L)'; }
+                csv += name;
+
+                const staffRequestData = allRequestsForAdmin[staffMember.uid];
+                const dates = staffRequestData ? staffRequestData.dates : {};
                 
                 for (let day = 1; day <= daysInMonth; day++) {
                     const dateString = year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
-                    let request = '';
-                    if (monthRequests[staffMember.id]) {
-                        const dates = monthRequests[staffMember.id].dates || monthRequests[staffMember.id];
-                        request = dates[dateString] || '';
-                    }
-                    csv += ',' + request;
+                    csv += ',' + (dates[dateString] || '');
                 }
                 csv += '\n';
             });
@@ -1386,34 +1272,11 @@
             link.click();
         }
 
-        function previousMonth() {
-            alert('前月の希望入力期間は終了しています');
-        }
-
-        function nextMonth() {
-            alert('翌月の希望入力期間はまだ開始されていません');
-        }
-
-        function logout() {
-            currentUser = null;
-            selectedDates = {};
-            selectedRequestType = null;
-            
-            document.getElementById('userId').value = '';
-            document.getElementById('password').value = '';
-            document.getElementById('loginError').textContent = '';
-            
-            document.getElementById('loginSection').classList.remove('hidden');
-            document.getElementById('mainSection').classList.add('hidden');
-            document.getElementById('adminSection').classList.add('hidden');
-            document.getElementById('changePasswordSection').classList.add('hidden');
-            document.getElementById('syncStatus').classList.add('hidden');
-        }
-
         // ============================================
-        // 同期状態表示
+        // 初期化処理
         // ============================================
         
+        // 同期状態 (変更なし)
         function updateSyncStatus(status) {
             const statusElement = document.getElementById('syncStatus');
             const textElement = document.getElementById('syncText');
@@ -1430,14 +1293,24 @@
             }
         }
 
-        // ============================================
-        // 初期化
-        // ============================================
-        
+        // リアルタイム同期設定 (オンライン/オフラインのみ)
+        function setupRealtimeSync() {
+            // Realtime Database の .info/connected を監視
+            try {
+                const connectedRef = firebase.database().ref('.info/connected');
+                connectedRef.on('value', (snapshot) => {
+                    const connected = snapshot.val();
+                    updateSyncStatus(connected ? 'online' : 'offline');
+                });
+            } catch (e) {
+                console.warn("Realtime Database が無効なため、オンライン状態が取得できません。");
+                // Realtime DBが無効でもFirestoreは動くので、エラーにはしない
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', async function() {
             console.log('ページ読み込み完了');
             
-            // Firebase初期化
             if (!initializeFirebase()) {
                 document.getElementById('loadingSection').innerHTML = 
                     '<div class="loading">' +
@@ -1448,17 +1321,14 @@
             }
             
             try {
-                // Firebaseからデータ読み込み
-                await loadFromFirebase();
-                
-                // リアルタイム同期設定
+                // オンライン/オフラインの監視を開始
                 setupRealtimeSync();
                 
                 // ログイン画面表示
                 document.getElementById('loadingSection').classList.add('hidden');
                 document.getElementById('loginSection').classList.remove('hidden');
                 
-                // Enterキーでログイン
+                // Enterキーでログイン (変更なし)
                 document.getElementById('password').addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
                         login();
@@ -1477,5 +1347,6 @@
             }
         });
     </script>
+    
 </body>
 </html>
