@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>シフト希望管理システム (Firebase版)</title>
     
+    <script src="firebase-config.js"></script>
+
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     
     <style>
+        /* (CSSは省略なし) */
         * {
             margin: 0;
             padding: 0;
@@ -516,40 +519,32 @@
     <div id="syncStatus" class="sync-status hidden">
         <span id="syncText">オンライン</span>
     </div>
-
     <script>
         // ============================================
-        // Firebaseの設定を外部から読み込み (変更なし)
+        // Firebaseの設定を外部から読み込み
         // ============================================
-        let firebaseConfig = null;
+        
+        // 🚨 `firebase-config.js` で定義された `firebaseConfig` を使います
+        // let firebaseConfig = null; // 削除
+        
         let auth = null;      // 認証用
         let firestore = null; // Firestore DB用
         let db = null;        // (互換性のため残す) Realtime DB用
 
-        function loadFirebaseConfig() {
-            const savedConfig = localStorage.getItem('firebaseConfig');
-            if (!savedConfig) {
-                alert('Firebaseの設定が必要です。設定画面へ移動します。');
-                window.location.href = 'firebase-config.html';
-                return false;
-            }
-            try {
-                firebaseConfig = JSON.parse(savedConfig);
-                return true;
-            } catch (error) {
-                alert('設定の読み込みに失敗しました。');
-                localStorage.removeItem('firebaseConfig');
-                window.location.href = 'firebase-config.html';
-                return false;
-            }
-        }
-
+        // 🚨 `loadFirebaseConfig` 関数は不要になったので「削除」
+        
         // Firebase初期化 (AuthとFirestoreを追加)
         function initializeFirebase() {
-            if (!loadFirebaseConfig()) {
-                return false;
-            }
+            // 🚨 `loadFirebaseConfig` の呼び出しを「削除」
+            
             try {
+                // 🚨 `firebaseConfig` が `firebase-config.js` から読み込まれているかチェック
+                if (typeof firebaseConfig === 'undefined' || !firebaseConfig.apiKey) {
+                    console.error('firebase-config.js が正しく読み込まれていないか、中身が空です。');
+                    alert('Firebaseの設定ファイル(firebase-config.js)が読み込めません。');
+                    return false;
+                }
+
                 firebase.initializeApp(firebaseConfig);
                 auth = firebase.auth();
                 firestore = firebase.firestore();
@@ -567,8 +562,6 @@
         // グローバル変数
         // ============================================
         
-        // 🚨 危険な職員リストとパスワードの配列は「完全に削除」しました
-
         // 祝日データ
         const holidays = {
             '2025-01-01': '元日',
@@ -613,7 +606,7 @@
         let allRequestsForAdmin = {}; // 管理者画面で使う希望データ
 
         // ============================================
-        // ログイン関連 (🚨 完全に新しいロジック)
+        // ログイン関連 (変更なし)
         // ============================================
         
         async function login() {
@@ -623,7 +616,7 @@
             
             // 職員IDから「ダミーメールアドレス」を組み立てる
             // ★★★ ここの 'app.com' の部分はあなたが決めたものにしてください ★★★
-            const email = `${userId}@7w.com`; // 例: '1' と入力されたら '1@app.com' になる
+            const email = `${userId}@app.com`; // 例: '1' と入力されたら '1@app.com' になる
 
             loginButton.disabled = true;
             loginButton.textContent = 'ログイン中...';
@@ -651,7 +644,6 @@
                     showChangePasswordSection();
                 } else {
                     // 通常ログイン
-                    // Firestoreのstaff名簿に isAdmin: true を持たせておく
                     if (currentUser.isAdmin === true) { 
                         showAdminSection();
                     } else {
@@ -672,13 +664,14 @@
             }
         }
 
-        // パスワード変更 (🚨 完全に新しいロジック)
+        // パスワード変更 (変更なし)
         async function changePassword() {
             const newPassword = document.getElementById('newPassword').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
 
-            if (!/^\d{6}$/.test(newPassword)) {
-                document.getElementById('passwordError').textContent = '6桁の数字を入力してください';
+            // ★★★ パスワードのルール（現在は「5桁の数字」） ★★★
+            if (!/^\d{5}$/.test(newPassword)) {
+                document.getElementById('passwordError').textContent = '5桁の数字を入力してください';
                 return;
             }
             if (newPassword !== confirmPassword) {
@@ -718,7 +711,7 @@
             }
         }
 
-        // ログアウト (🚨 Authのログアウトを追加)
+        // ログアウト (変更なし)
         async function logout() {
             try {
                 await auth.signOut();
@@ -743,7 +736,7 @@
 
 
         // ============================================
-        // 画面表示 (ロジックはほぼ変更なし)
+        // 画面表示 (変更なし)
         // ============================================
         
         function showChangePasswordSection() {
@@ -763,12 +756,8 @@
             setTargetMonth();
             startCountdown();
             
-            // Firestoreからデータを読み込む
             await loadUserRequests();
-            // 読み込んだ後にカレンダーを描画
             renderCalendar(); 
-            
-            // 提出状況を更新 (Firestoreから)
             await updateSubmissionStatus();
         }
 
@@ -780,12 +769,11 @@
             
             currentMonth = new Date();
             
-            // 管理者テーブルを描画 (Firestoreから)
             await renderAdminTable();
         }
 
         // ============================================
-        // カレンダー関連 (ロジックはほぼ変更なし)
+        // カレンダー関連 (変更なし)
         // ============================================
         
         function setTargetMonth() {
@@ -809,7 +797,6 @@
             const calendarElement = document.getElementById('calendar');
             calendarElement.innerHTML = '';
             
-            // 曜日ヘッダー
             const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
             weekdays.forEach((day, index) => {
                 const header = document.createElement('div');
@@ -824,14 +811,12 @@
             const lastDay = new Date(year, month + 1, 0);
             const startDay = firstDay.getDay();
             
-            // 空白セル
             for (let i = 0; i < startDay; i++) {
                 const emptyDay = document.createElement('div');
                 emptyDay.className = 'calendar-day empty';
                 calendarElement.appendChild(emptyDay);
             }
             
-            // 日付セル
             for (let day = 1; day <= lastDay.getDate(); day++) {
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day';
@@ -894,7 +879,7 @@
         }
 
         // ============================================
-        // 希望管理 (一部変更あり)
+        // 希望管理 (変更なし)
         // ============================================
         
         function setRequestType(type) {
@@ -989,15 +974,12 @@
         }
 
         // ============================================
-        // 希望管理 (🚨 Firestore版に書き換え)
+        // 希望管理 (Firestore版 / 変更なし)
         // ============================================
 
         // データをFirestoreに保存
         async function saveRequestsToFirebase(monthKey, staffUid, data) {
             try {
-                // ドキュメント: {YYYY-MM}
-                // フィールド: { uid: data, uid2: data2 }
-                // set + merge:true で、指定したUIDのデータだけを上書き
                 const docRef = firestore.collection('requests').doc(monthKey);
                 await docRef.set({
                     [staffUid]: data
@@ -1030,11 +1012,10 @@
                 selectedDates = {};
             }
             
-            // 読み込んだらリストも更新
             updateSelectedDatesList();
         }
 
-        // 希望を提出 (🚨 Firestore版)
+        // 希望を提出
         async function submitRequests() {
             if (Object.keys(selectedDates).length === 0) {
                 if (!confirm('希望が選択されていません。空の希望（希望なし）として提出しますか？')) {
@@ -1059,7 +1040,7 @@
                     dates: selectedDates,
                     submittedAt: new Date().toISOString(),
                     staffName: currentUser.name,
-                    originalId: currentUser.originalId // originalIdも保存
+                    originalId: currentUser.originalId 
                 };
                 
                 await saveRequestsToFirebase(monthKey, currentUser.uid, data);
@@ -1067,7 +1048,6 @@
                 document.getElementById('submitMessage').innerHTML = 
                     '<span class="success-message">希望が提出されました！</span>';
                 
-                // 提出状況を更新
                 await updateSubmissionStatus();
 
                 setTimeout(() => {
@@ -1083,22 +1063,19 @@
             }
         }
 
-        // 提出状況の表示 (🚨 Firestore版)
+        // 提出状況の表示
         async function updateSubmissionStatus() {
             const year = currentMonth.getFullYear();
             const month = currentMonth.getMonth() + 1;
             const monthKey = year + '-' + String(month).padStart(2, '0');
 
             try {
-                // 1. 全職員のリストを取得 (管理者でなくても取得が必要)
-                //    Firestoreの 'staff' コレクションから 'isAdmin' が false の人だけ取得
                 const staffSnapshot = await firestore.collection('staff')
-                    .where('isAdmin', '!=', true) // isAdminがtrueでない人（職員）
+                    .where('isAdmin', '!=', true) 
                     .get();
                 
                 const allStaff = staffSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
                 
-                // 2. その月の希望データを取得
                 const requestsDoc = await firestore.collection('requests').doc(monthKey).get();
                 const monthRequests = requestsDoc.exists ? requestsDoc.data() : {};
 
@@ -1134,7 +1111,7 @@
             }
         }
 
-        // カレンダー月移動ボタン (変更なし)
+        // カレンダー月移動ボタン
         function previousMonth() {
             alert('前月の希望入力期間は終了しています');
         }
@@ -1145,7 +1122,7 @@
 
 
         // ============================================
-        // 管理者機能 (🚨 Firestore版に書き換え)
+        // 管理者機能 (変更なし)
         // ============================================
         
         async function renderAdminTable() {
@@ -1156,17 +1133,14 @@
             document.getElementById('adminMonth').textContent = year + '年' + month + '月の希望一覧';
             
             try {
-                // 1. 全職員のリストを取得
                 const staffSnapshot = await firestore.collection('staff')
-                    .orderBy('originalId', 'asc') // originalIdで並び替え
+                    .orderBy('originalId', 'asc') 
                     .get();
                 staffListForAdmin = staffSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
 
-                // 2. その月の希望データを取得
                 const requestsDoc = await firestore.collection('requests').doc(monthKey).get();
                 allRequestsForAdmin = requestsDoc.exists ? requestsDoc.data() : {};
                 
-                // 3. テーブルヘッダーを描画 (変更なし)
                 const header = document.getElementById('adminTableHeader');
                 header.innerHTML = '<th>ID</th><th>チーム</th><th>職員名</th>';
                 const daysInMonth = new Date(year, month, 0).getDate();
@@ -1174,24 +1148,22 @@
                     header.innerHTML += '<th>' + day + '</th>';
                 }
 
-                // 4. テーブルボディを描画
                 const tbody = document.getElementById('adminTableBody');
                 tbody.innerHTML = '';
                 
                 for (const staffMember of staffListForAdmin) {
-                    if (staffMember.isAdmin) continue; // 管理者は一覧から除外
+                    if (staffMember.isAdmin) continue; 
 
                     let row = '<tr>';
                     row += `<td>${staffMember.originalId || ''}</td>`;
-                    row += `<td>${staffMember.team || ''}</td>`; // Firestoreに 'team' フィールドを持たせる
+                    row += `<td>${staffMember.team || ''}</td>`;
                     
                     let nameDisplay = staffMember.name;
-                    if (staffMember.leader) { // Firestoreに 'leader' フィールドを持たせる
+                    if (staffMember.leader) { 
                         nameDisplay += ' <span style="color: #ff9800; font-weight: bold;">L</span>';
                     }
                     row += `<td>${nameDisplay}</td>`;
 
-                    // 希望データを描画
                     const staffRequestData = allRequestsForAdmin[staffMember.uid];
                     const dates = staffRequestData ? staffRequestData.dates : {};
 
@@ -1199,7 +1171,6 @@
                         const dateString = year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
                         const cellContent = dates[dateString] || '';
                         let cellStyle = '';
-                        // セルの色分け
                         switch(cellContent) {
                             case '休': cellStyle = 'background: #ffebee;'; break;
                             case '年': cellStyle = 'background: #e3f2fd;'; break;
@@ -1234,7 +1205,7 @@
             await renderAdminTable();
         }
 
-        // CSVエクスポート (🚨 Firestoreの変数を使うように変更)
+        // CSVエクスポート
         function exportToCSV() {
             const year = currentMonth.getFullYear();
             const month = currentMonth.getMonth() + 1;
@@ -1244,7 +1215,6 @@
             for (let day = 1; day <= daysInMonth; day++) { csv += ',' + day + '日'; }
             csv += '\n';
             
-            // staffListForAdmin と allRequestsForAdmin を使う
             staffListForAdmin.forEach(staffMember => {
                 if (staffMember.isAdmin) return;
 
@@ -1273,10 +1243,10 @@
         }
 
         // ============================================
-        // 初期化処理
+        // 初期化処理 (変更なし)
         // ============================================
         
-        // 同期状態 (変更なし)
+        // 同期状態
         function updateSyncStatus(status) {
             const statusElement = document.getElementById('syncStatus');
             const textElement = document.getElementById('syncText');
@@ -1293,9 +1263,8 @@
             }
         }
 
-        // リアルタイム同期設定 (オンライン/オフラインのみ)
+        // リアルタイム同期設定
         function setupRealtimeSync() {
-            // Realtime Database の .info/connected を監視
             try {
                 const connectedRef = firebase.database().ref('.info/connected');
                 connectedRef.on('value', (snapshot) => {
@@ -1304,7 +1273,6 @@
                 });
             } catch (e) {
                 console.warn("Realtime Database が無効なため、オンライン状態が取得できません。");
-                // Realtime DBが無効でもFirestoreは動くので、エラーにはしない
             }
         }
 
@@ -1321,14 +1289,11 @@
             }
             
             try {
-                // オンライン/オフラインの監視を開始
                 setupRealtimeSync();
                 
-                // ログイン画面表示
                 document.getElementById('loadingSection').classList.add('hidden');
                 document.getElementById('loginSection').classList.remove('hidden');
                 
-                // Enterキーでログイン (変更なし)
                 document.getElementById('password').addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
                         login();
