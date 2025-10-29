@@ -1,6 +1,6 @@
 // この中に、Firebaseコンソールからコピーした設定を貼り付けます
 const firebaseConfig = {
-  apiKey: "AIzaSyB76MVgiAj7tL0ty5qgMT_kGutOwFw-WaYH_DOMAIN",
+  apiKey: "AIzaSyB76MVgiAj7tL0ty5qgMT_kGutOwFw-WaY",
   projectId: "shift-management-system-bc2ac",
   storageBucket: "Yshift-management-system-bc2ac.firebasestorage.app",
   messagingSenderId: "482437174317",
