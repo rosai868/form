@@ -512,6 +512,10 @@
                 画面から、該当の職員（例: 1@app.com）のパスワードをリセットしてください。
             </p>
         </div>
+        <div id="mainSection" class="container hidden">
+        <div id="submitMessage" style="margin-top: 10px;"></div>
+
+        <button onclick="showChangePasswordForm()" class="logout-button" style="background: #f39c12; margin-top: 10px;">パスワードを変更する</button>
         
         <button onclick="logout()" class="logout-button">ログアウト</button>
     </div>
@@ -663,7 +667,15 @@
                 loginButton.textContent = 'ログイン';
             }
         }
-
+        
+        function showChangePasswordForm() {
+            // メイン画面（または管理者画面）を隠す
+            document.getElementById('mainSection').classList.add('hidden');
+            document.getElementById('adminSection').classList.add('hidden');
+            
+            // パスワード変更画面を表示する
+            document.getElementById('changePasswordSection').classList.remove('hidden');
+        }
         // パスワード変更 (変更なし)
         async function changePassword() {
             const newPassword = document.getElementById('newPassword').value;
