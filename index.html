@@ -187,14 +187,14 @@
         .calendar-day {
             background: white;
             min-height: 60px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            position: relative;
+            /* ... (中略) ... */
             user-select: none;
             transition: background 0.2s;
+            border: 2px solid transparent; /* <-- この行を追加 */
+        }
+        /* ↓ このブロックも追加 */
+        .calendar-day.selected {
+             box-sizing: border-box; 
         }
 
         .calendar-day:hover:not(.disabled):not(.empty) {
@@ -224,9 +224,22 @@
             cursor: not-allowed;
         }
 
-        .calendar-day.selected {
-            border: 2px solid #005A9C; /* メインカラー */
-            background: #E6F0F6; /* メインカラーの薄い色 */
+        /* カレンダーセル (選択時) の枠線と背景 (★色分け) */
+        .calendar-day.selected-休 {
+            border-color: #dc3545;
+            background-color: #fdf2f2;
+        }
+        .calendar-day.selected-年 {
+            border-color: #007bff;
+            background-color: #f0f7ff;
+        }
+        .calendar-day.selected-出 {
+            border-color: #fd7e14;
+            background-color: #fff8f0;
+        }
+        .calendar-day.selected-日 {
+            border-color: #28a745;
+            background-color: #f0fff4;
         }
 
         .calendar-day-number {
@@ -235,16 +248,26 @@
         }
 
         /* 予定表示 (色を統一) */
+        /* カレンダー内のバッジ (★色分け) */
         .calendar-day-request {
             position: absolute;
             bottom: 3px;
             font-size: 11px;
             padding: 1px 4px;
             border-radius: 3px;
-            color: #005A9C;
             font-weight: 600;
-            background: #E6F0F6;
-            border: 1px solid #005A9C;
+        }
+        .request-type-休 {
+            color: #dc3545; background: #fdf2f2; border: 1px solid #dc3545;
+        }
+        .request-type-年 {
+            color: #007bff; background: #f0f7ff; border: 1px solid #007bff;
+        }
+        .request-type-出 {
+            color: #fd7e14; background: #fff8f0; border: 1px solid #fd7e14;
+        }
+        .request-type-日 {
+            color: #28a745; background: #f0fff4; border: 1px solid #28a745;
         }
 
         /* .request-type-* のカラフルな背景色指定は削除 
@@ -276,11 +299,18 @@
         }
 
         /* アクティブなボタンのデザインを変更 */
-        .request-button.active {
-            border-color: #005A9C;
-            background: #005A9C;
-            color: white;
-            box-shadow: 0 2px 4px rgba(0,90,156,0.3);
+       /* アクティブなボタンのデザインを変更 (★色分け) */
+        .request-button.active[data-type="休"] {
+            background-color: #dc3545; border-color: #dc3545; color: white;
+        }
+        .request-button.active[data-type="年"] {
+            background-color: #007bff; border-color: #007bff; color: white;
+        }
+        .request-button.active[data-type="出"] {
+            background-color: #fd7e14; border-color: #fd7e14; color: white;
+        }
+        .request-button.active[data-type="日"] {
+            background-color: #28a745; border-color: #28a745; color: white;
         }
 
         /* .request-button[data-type] の色付きborder-leftは削除
@@ -875,12 +905,17 @@
             dayNumber.textContent = day;
             dayElement.appendChild(dayNumber);
             
-            if (selectedDates[dateString]) {
+           if (selectedDates[dateString]) {
+                const requestType = selectedDates[dateString]; // 希望タイプを取得
                 const request = document.createElement('div');
-                request.className = 'calendar-day-request'; // 色のクラスは削除
-                request.textContent = selectedDates[dateString];
+                
+                // バッジ用のCSSクラスを追加 (例: request-type-休)
+                request.className = 'calendar-day-request request-type-' + requestType; 
+                request.textContent = requestType;
                 dayElement.appendChild(request);
-                dayElement.className += ' selected';
+                
+                // セル自体にも色分け用のクラスを追加 (例: selected-休)
+                dayElement.className += ' selected selected-' + requestType; 
             }
             
             calendarElement.appendChild(dayElement);
