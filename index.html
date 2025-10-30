@@ -21,7 +21,7 @@
 
         body {
             font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
-            background: #f4f7f6; /* 少し柔らかい背景色 */
+            background: #f4f7f6;
             padding: 20px;
             color: #333;
         }
@@ -98,7 +98,7 @@
         button {
             width: 100%;
             padding: 12px;
-            background: #005A9C; /* 落ち着いた紺色 (メインカラー) */
+            background: #005A9C; /* メインカラー (紺色) */
             color: white;
             border: none;
             border-radius: 4px;
@@ -109,7 +109,7 @@
         }
 
         button:hover {
-            background: #004a80; /* 少し濃い紺色 */
+            background: #004a80;
         }
 
         button:disabled {
@@ -150,7 +150,7 @@
         .calendar-header button {
             width: auto;
             padding: 8px 20px;
-            background: #6c757d; /* グレー */
+            background: #6c757d;
         }
 
         .calendar-header button:hover {
@@ -168,7 +168,7 @@
         }
 
         .weekday-header {
-            background: #343a40; /* ダークグレー */
+            background: #343a40;
             color: white;
             padding: 10px 5px;
             text-align: center;
@@ -177,11 +177,11 @@
         }
 
         .weekday-header.sunday {
-            background: #dc3545; /* 落ち着いた赤 */
+            background: #dc3545;
         }
 
         .weekday-header.saturday {
-            background: #007bff; /* 落ち着いた青 */
+            background: #007bff;
         }
 
         .calendar-day {
@@ -195,15 +195,23 @@
             position: relative;
             user-select: none;
             transition: background 0.2s;
+            border: 2px solid transparent; /* 枠線の分のスペースを確保 */
         }
+        
+        /* 枠線を外側でなく内側に引くため、box-sizing を変更 */
+        .calendar-day.selected {
+            box-sizing: border-box;
+        }
+
 
         .calendar-day:hover:not(.disabled):not(.empty) {
             background: #f0f7ff;
         }
 
         .calendar-day.empty {
-            background: #f4f7f6; /* 背景色と同じ */
+            background: #f4f7f6;
             cursor: default;
+            border: none; /* 空白セルは枠線不要 */
         }
 
         .calendar-day.sunday {
@@ -224,43 +232,90 @@
             cursor: not-allowed;
         }
 
-        .calendar-day.selected {
-            border: 2px solid #005A9C; /* メインカラー */
-            background: #E6F0F6; /* メインカラーの薄い色 */
-        }
-
         .calendar-day-number {
             font-size: 14px;
             font-weight: bold;
         }
 
-        /* 予定表示 (色を統一) */
+        /* --- ここから色分けのためのCSSを追加 --- */
+        
+        /* カレンダー内のバッジ (デフォルト) */
         .calendar-day-request {
             position: absolute;
             bottom: 3px;
             font-size: 11px;
             padding: 1px 4px;
             border-radius: 3px;
-            color: #005A9C;
             font-weight: 600;
-            background: #E6F0F6;
-            border: 1px solid #005A9C;
+        }
+        
+        /* 希望ボタン (アクティブ時) の色 */
+        .request-button.active[data-type="休"] {
+            background: #dc3545; border-color: #dc3545; color: white;
+        }
+        .request-button.active[data-type="年"] {
+            background: #007bff; border-color: #007bff; color: white;
+        }
+        .request-button.active[data-type="出"] {
+            background: #fd7e14; border-color: #fd7e14; color: white;
+        }
+        .request-button.active[data-type="日"] {
+            background: #28a745; border-color: #28a745; color: white;
         }
 
-        /* .request-type-* のカラフルな背景色指定は削除 
-        */
+        /* カレンダーセル (選択時) の枠線と背景 */
+        .calendar-day.selected-休 {
+            border-color: #dc3545;
+            background: #fdf2f2;
+        }
+        .calendar-day.selected-年 {
+            border-color: #007bff;
+            background: #f0f7ff;
+        }
+        .calendar-day.selected-出 {
+            border-color: #fd7e14;
+            background: #fff8f0;
+        }
+        .calendar-day.selected-日 {
+            border-color: #28a745;
+            background: #f0fff4;
+        }
 
-        /* 希望選択ボタン (★レスポンシブ対応) */
+        /* カレンダー内のバッジの色 */
+        .request-type-休 {
+            color: #dc3545;
+            background: #fdf2f2;
+            border: 1px solid #dc3545;
+        }
+        .request-type-年 {
+            color: #007bff;
+            background: #f0f7ff;
+            border: 1px solid #007bff;
+        }
+        .request-type-出 {
+            color: #fd7e14;
+            background: #fff8f0;
+            border: 1px solid #fd7e14;
+        }
+        .request-type-日 {
+            color: #28a745;
+            background: #f0fff4;
+            border: 1px solid #28a745;
+        }
+
+        /* --- 色分けCSSここまで --- */
+
+
+        /* 希望選択ボタン (レスポンシブ対応) */
         .request-buttons {
             display: grid;
-            /* 画面幅に合わせて自動で折り返す (最小130px、最大1fr) */
             grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
             gap: 10px;
             margin: 20px 0;
         }
 
         .request-button {
-            padding: 15px 10px; /* パディングを調整 */
+            padding: 15px 10px;
             text-align: center;
             border: 2px solid #dde1e3;
             border-radius: 4px;
@@ -270,21 +325,10 @@
             transition: all 0.2s;
         }
 
-        .request-button:hover {
+        .request-button:hover:not(.active) { /* アクティブでない時だけホバー */
             background: #f5f5f5;
             border-color: #b0b0b0;
         }
-
-        /* アクティブなボタンのデザインを変更 */
-        .request-button.active {
-            border-color: #005A9C;
-            background: #005A9C;
-            color: white;
-            box-shadow: 0 2px 4px rgba(0,90,156,0.3);
-        }
-
-        /* .request-button[data-type] の色付きborder-leftは削除
-        */
 
         /* 選択済みリスト */
         .selected-dates {
@@ -308,7 +352,7 @@
         .selected-date-item button {
             width: auto;
             padding: 5px 15px;
-            background: #dc3545; /* 落ち着いた赤 */
+            background: #dc3545;
             font-size: 12px;
         }
         .selected-date-item button:hover {
@@ -323,7 +367,7 @@
         }
 
         .success-message {
-            color: #28a745; /* 落ち着いた緑 */
+            color: #28a745;
             margin-top: 10px;
             text-align: center;
         }
@@ -350,14 +394,13 @@
         }
 
         .admin-table th {
-            background: #343a40; /* ダークグレー */
+            background: #343a40;
             color: white;
             font-weight: bold;
             position: sticky;
             top: 0;
         }
 
-        /* (stickyのCSSは変更なし) */
         .admin-table td:first-child {
             text-align: center;
             font-weight: bold;
@@ -385,7 +428,7 @@
         }
 
         .logout-button {
-            background: #dc3545; /* 落ち着いた赤 */
+            background: #dc3545;
             margin-top: 20px;
         }
 
@@ -393,23 +436,20 @@
             background: #c82333;
         }
         
-        /* パスワード変更ボタンの色 */
         .password-change-button {
-            background: #fd7e14; /* 落ち着いたオレンジ */
+            background: #fd7e14;
             margin-top: 10px;
         }
         .password-change-button:hover {
             background: #e66a01;
         }
 
-
-        /* 同期状態 */
         .sync-status {
             position: fixed;
             bottom: 20px;
             right: 20px;
             padding: 10px 20px;
-            background: #28a745; /* 落ち着いた緑 */
+            background: #28a745;
             color: white;
             border-radius: 20px;
             font-size: 12px;
@@ -421,35 +461,16 @@
         }
 
         .sync-status.syncing {
-            background: #fd7e14;
+            background: #FF9800;
         }
     </style>
 </head>
 <body>
     <div id="loadingSection" class="container">
-        <div class="loading">
-            <p>システムを初期化中...</p>
-            <p style="font-size: 14px; margin-top: 10px;">しばらくお待ちください</p>
         </div>
-    </div>
 
     <div id="loginSection" class="container login-container hidden">
-        <h1>シフト希望管理システム</h1>
-        <div class="form-group">
-            <label for="userId">ID</label>
-            <input type="text" id="userId" placeholder="IDを入力">
         </div>
-        <div class="form-group">
-            <label for="password">パスワード</label>
-            <input type="password" id="password" placeholder="パスワードを入力">
-        </div>
-        <button onclick="login()" id="loginButton">ログイン</button>
-        <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 4px; font-size: 12px; color: #666; line-height: 1.6;">
-            <p style="margin: 5px 0;">※ ID・パスワードを忘れた場合は師長に連絡してください</p>
-            <p style="margin: 5px 0;">※ 締め切りは毎月7日です</p>
-        </div>
-        <div id="loginError" class="error-message"></div>
-    </div>
 
     <div id="changePasswordSection" class="container login-container hidden">
         <h2>初回ログイン - パスワード変更</h2>
@@ -558,12 +579,12 @@
     
     <script>
     // ============================================
-    // Firebaseの設定を外部から読み込み
+    // Firebaseの設定
     // ============================================
     
-    let auth = null;      // 認証用
-    let firestore = null; // Firestore DB用
-    let db = null;        // (互換性のため残す) Realtime DB用
+    let auth = null;      
+    let firestore = null; 
+    let db = null;        
 
     function initializeFirebase() {
         try {
@@ -661,7 +682,7 @@
             };
 
             if (currentUser.passwordChanged === false) {
-                showChangePasswordSection();
+                showChangePasswordForm();
             } else {
                 if (currentUser.isAdmin === true) { 
                     showAdminSection();
@@ -687,12 +708,10 @@
         document.getElementById('adminSection').classList.add('hidden');
         document.getElementById('loginSection').classList.add('hidden');
         
-        // フォームの入力値をリセット
         document.getElementById('newPassword').value = '';
         document.getElementById('confirmPassword').value = '';
         document.getElementById('passwordError').textContent = '';
         
-        // タイトルを動的に変更
         const titleElement = document.querySelector('#changePasswordSection h2');
         if (currentUser && currentUser.passwordChanged) {
             titleElement.textContent = 'パスワード変更';
@@ -707,7 +726,6 @@
         const newPassword = document.getElementById('newPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
 
-        // ★★★ 6桁の数字に変更 ★★★
         if (!/^\d{6}$/.test(newPassword)) {
             document.getElementById('passwordError').textContent = '6桁の数字を入力してください';
             return;
@@ -819,6 +837,7 @@
         }
     }
 
+    /* --- 🔽 JSを1箇所だけ修正 🔽 --- */
     function renderCalendar() {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth();
@@ -876,16 +895,23 @@
             dayElement.appendChild(dayNumber);
             
             if (selectedDates[dateString]) {
+                const requestType = selectedDates[dateString]; // 希望タイプを取得
                 const request = document.createElement('div');
-                request.className = 'calendar-day-request'; // 色のクラスは削除
-                request.textContent = selectedDates[dateString];
+                
+                // バッジ用のCSSクラスを追加
+                request.className = 'calendar-day-request request-type-' + requestType; 
+                request.textContent = requestType;
                 dayElement.appendChild(request);
-                dayElement.className += ' selected';
+                
+                // セル自体にも色分け用のクラスを追加 (例: selected-休)
+                dayElement.className += ' selected selected-' + requestType; 
             }
             
             calendarElement.appendChild(dayElement);
         }
     }
+    /* --- 🔼 JSの修正はここまで 🔼 --- */
+
 
     function formatDate(date) {
         const year = date.getFullYear();
@@ -1196,6 +1222,8 @@
                 for (let day = 1; day <= daysInMonth; day++) {
                     const dateString = year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
                     const cellContent = dates[dateString] || '';
+                    
+                    // ★ 管理者画面も色を統一
                     let cellStyle = '';
                     switch(cellContent) {
                         case '休': cellStyle = 'background: #fdf2f2;'; break;
