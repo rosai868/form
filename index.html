@@ -1143,7 +1143,6 @@
 
         try {
             const staffSnapshot = await firestore.collection('staff')
-                .where('isAdmin', '!=', true) 
                 .get();
             
             const allStaff = staffSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
@@ -1205,7 +1204,6 @@
         
         try {
             const staffSnapshot = await firestore.collection('staff')
-                .orderBy('originalId', 'asc') 
                 .get();
             staffListForAdmin = staffSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
 
