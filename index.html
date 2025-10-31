@@ -563,7 +563,7 @@
                 画面から、該当の職員（例: 1@app.com）のパスワードをリセットしてください。
             </p>
         </div>
-        
+        <button id="adminButton" onclick="showAdminSection()" class="logout-button hidden" style="background: #6c757d; margin-top: 10px;">管理者画面へ</button>
         <button onclick="showChangePasswordForm()" class="logout-button password-change-button">パスワードを変更する</button>
         <button onclick="logout()" class="logout-button">ログアウト</button>
     </div>
@@ -676,14 +676,12 @@
                 ...staffDoc.data()
             };
 
-            if (currentUser.passwordChanged === false) {
+           if (currentUser.passwordChanged === false) {
                 showChangePasswordSection();
             } else {
-                if (currentUser.isAdmin === true) { 
-                    showAdminSection();
-                } else {
-                    showMainSection();
-                }
+                // ★★★ 修正点 ★★★
+                // 管理者であっても、まずメイン画面を表示する
+                showMainSection();
             }
         } catch (error) {
             console.error('ログインエラー:', error);
@@ -797,7 +795,11 @@
         document.getElementById('syncStatus').classList.remove('hidden');
         
         document.getElementById('welcomeMessage').textContent = currentUser.name + 'さん、こんにちは';
-        
+        if (currentUser.isAdmin === true) {
+            document.getElementById('adminButton').classList.remove('hidden');
+        } else {
+            document.getElementById('adminButton').classList.add('hidden');
+        }
         setTargetMonth();
         startCountdown();
         
