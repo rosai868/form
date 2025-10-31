@@ -375,32 +375,34 @@
             top: 0;
         }
 
-        .admin-table td:first-child {
+        .admin-table td:first-child { /* ID列 */
             text-align: center;
             font-weight: bold;
             background: #f5f5f5;
             position: sticky;
             left: 0;
-            min-width: 40px;
+            min-width: 30px; /* ★ 40pxから30pxに変更 */
         }
-        .admin-table td:nth-child(2) {
+        
+        .admin-table td:nth-child(2) { /* チーム列 */
             text-align: center;
             font-weight: bold;
             background: #f5f5f5;
             position: sticky;
-            left: 40px;
-            min-width: 50px;
+            left: 30px; /* ★ 40pxから30pxに変更 (ID列の幅に合わせる) */
+            min-width: 40px; /* ★ 50pxから40pxに変更 */
         }
-        .admin-table td:nth-child(3) {
+        
+        .admin-table td:nth-child(3) { /* 職員名列 */
             text-align: left;
             padding-left: 10px;
             font-weight: bold;
             background: #f5f5f5;
             position: sticky;
-            left: 90px;
-            min-width: 100px;
+            left: 70px; /* ★ 90pxから70pxに変更 (ID 30px + チーム 40px) */
+            min-width: 80px; /* ★ 100pxから80pxに変更 */
+            white-space: nowrap; /* ★ 名前が折り返さないように追加 */
         }
-
         .logout-button {
             background: #dc3545;
             margin-top: 20px;
