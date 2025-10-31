@@ -6,7 +6,6 @@
     <title>シフト希望管理システム (Firebase版)</title>
     
     <script src="firebase-config.js"></script>
-
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -183,7 +182,7 @@
 
         .calendar-day {
             background: white;
-            height: 65px; /* 高さ */
+            height: 65px;
             display: flex;
             flex-direction: column;
             cursor: pointer;
@@ -528,8 +527,9 @@
         
         <div id="submitMessage" style="margin-top: 10px;"></div>
 
-        <button onclick="showChangePasswordForm()" class="logout-button password-change-button">パスワードを変更する</button>
+        <button id="adminButton" onclick="showAdminSection()" class="logout-button hidden" style="background: #6c757d; margin-top: 10px;">管理者画面へ</button>
         
+        <button onclick="showChangePasswordForm()" class="logout-button password-change-button">パスワードを変更する</button>
         <button onclick="logout()" class="logout-button">ログアウト</button>
     </div>
     
@@ -565,7 +565,7 @@
                 画面から、該当の職員（例: 1@app.com）のパスワードをリセットしてください。
             </p>
         </div>
-        <button id="adminButton" onclick="showAdminSection()" class="logout-button hidden" style="background: #6c757d; margin-top: 10px;">管理者画面へ</button>
+        
         <button onclick="showChangePasswordForm()" class="logout-button password-change-button">パスワードを変更する</button>
         <button onclick="logout()" class="logout-button">ログアウト</button>
     </div>
@@ -678,13 +678,15 @@
                 ...staffDoc.data()
             };
 
-           if (currentUser.passwordChanged === false) {
+            /* --- 🔽 JS 修正 3/6 🔽 --- */
+            if (currentUser.passwordChanged === false) {
                 showChangePasswordSection();
             } else {
-                // ★★★ 修正点 ★★★
-                // 管理者であっても、まずメイン画面を表示する
+                // ★ 管理者であっても、まずメイン画面を表示する
                 showMainSection();
             }
+            /* --- 🔼 JS 修正 3/6 🔼 --- */
+
         } catch (error) {
             console.error('ログインエラー:', error);
             if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
@@ -745,12 +747,9 @@
             alert('パスワードが変更されました。');
             
             currentUser.passwordChanged = true;
-
-            if (currentUser.isAdmin === true) {
-                showAdminSection();
-            } else {
-                showMainSection();
-            }
+            
+            // ★ 修正 ★ (ログイン時と同じロジックに変更)
+            showMainSection();
 
         } catch (error) {
             console.error('パスワード変更エラー:', error);
@@ -789,6 +788,7 @@
         document.getElementById('changePasswordSection').classList.remove('hidden');
     }
 
+    /* --- 🔽 JS 修正 4/6 🔽 --- */
     async function showMainSection() {
         document.getElementById('loginSection').classList.add('hidden');
         document.getElementById('changePasswordSection').classList.add('hidden');
@@ -797,11 +797,14 @@
         document.getElementById('syncStatus').classList.remove('hidden');
         
         document.getElementById('welcomeMessage').textContent = currentUser.name + 'さん、こんにちは';
+
+        // ★ 管理者ボタンの表示/非表示を切り替え
         if (currentUser.isAdmin === true) {
             document.getElementById('adminButton').classList.remove('hidden');
         } else {
             document.getElementById('adminButton').classList.add('hidden');
         }
+        
         setTargetMonth();
         startCountdown();
         
@@ -809,6 +812,8 @@
         renderCalendar(); 
         await updateSubmissionStatus();
     }
+    /* --- 🔼 JS 修正 4/6 🔼 --- */
+
 
     async function showAdminSection() {
         document.getElementById('loginSection').classList.add('hidden');
@@ -1112,7 +1117,7 @@
         }
     }
 
-    /* --- 🔽 JS 修正 1/2 🔽 --- */
+    /* --- 🔽 JS 修正 5/6 🔽 --- */
     async function updateSubmissionStatus() {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth() + 1;
@@ -1141,7 +1146,7 @@
                 }
             }
             
-            const totalStaff = submitted.length + notSubmitted.length; // 管理者を除いた人数
+            const totalStaff = submitted.length + notSubmitted.length;
             const percentage = (totalStaff > 0) ? Math.round((submitted.length / totalStaff) * 100) : 0;
             
             document.getElementById('submissionStatusContent').innerHTML = 
@@ -1161,7 +1166,7 @@
                 '<span style="color: red;">提出状況の取得に失敗しました (エラー: ' + error.message + ')</span>';
         }
     }
-    /* --- 🔼 JS 修正 1/2 🔼 --- */
+    /* --- 🔼 JS 修正 5/6 🔼 --- */
 
 
     function previousMonth() {
@@ -1177,7 +1182,7 @@
     // 管理者機能
     // ============================================
     
-    /* --- 🔽 JS 修正 2/2 🔽 --- */
+    /* --- 🔽 JS 修正 6/6 🔽 --- */
     async function renderAdminTable() {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth() + 1;
@@ -1247,7 +1252,7 @@
                 `<tr><td colspan="34" style="color: red;">データ取得エラー: ${error.message}</td></tr>`;
         }
     }
-    /* --- 🔼 JS 修正 2/2 🔼 --- */
+    /* --- 🔼 JS 修正 6/6 🔼 --- */
 
 
     async function showPreviousMonth() {
