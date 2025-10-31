@@ -394,15 +394,15 @@
         }
         
         .admin-table td:nth-child(3) { /* 職員名列 */
-            text-align: left;
-            padding-left: 10px;
-            font-weight: bold;
-            background: #f5f5f5;
-            position: sticky;
-            left: 50px; /* ★ 90pxから70pxに変更 (ID 30px + チーム 40px) */
-            min-width: 30px; /* ★ 100pxから80pxに変更 */
-            white-space: nowrap; /* ★ 名前が折り返さないように追加 */
-        }
+            text-align: left;
+            padding-left: 10px;
+            font-weight: bold;
+            background: #f5f5f5;
+            position: sticky;
+            left: 65px; /* (変更なし: ID 30px + チーム 35px) */
+            min-width: 75px; /* ★ 85pxから75pxに縮小 */
+            white-space: nowrap; 
+        }
         .logout-button {
             background: #dc3545;
             margin-top: 20px;
@@ -1215,8 +1215,7 @@
             tbody.innerHTML = '';
             
             for (const staffMember of staffListForAdmin) {
-                if (staffMember.isAdmin) continue; 
-
+               
                 let row = '<tr>';
                 row += `<td>${staffMember.originalId || ''}</td>`;
                 row += `<td>${staffMember.team || ''}</td>`;
