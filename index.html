@@ -461,7 +461,7 @@
     </div>
 
     <div id="loginSection" class="container login-container hidden">
-        <h1>シフト希望管理システム</h1>
+        <h1>7西シフト希望</h1>
         <div class="form-group">
             <label for="userId">ID</label>
             <input type="text" id="userId" placeholder="IDを入力">
@@ -494,7 +494,7 @@
     </div>
 
     <div id="mainSection" class="container hidden">
-        <h1>シフト希望入力</h1>
+        <h1>7西シフト</h1>
         <div id="welcomeMessage" style="text-align: center; margin-bottom: 20px;"></div>
         
         <div class="timer">
@@ -806,7 +806,7 @@
         document.getElementById('mainSection').classList.remove('hidden');
         document.getElementById('syncStatus').classList.remove('hidden');
         
-        document.getElementById('welcomeMessage').textContent = currentUser.name + 'さん、こんにちは';
+        document.getElementById('welcomeMessage').textContent = currentUser.name + 'さん、お疲れ様です！';
 
         if (currentUser.isAdmin === true) {
             document.getElementById('adminButton').classList.remove('hidden');
