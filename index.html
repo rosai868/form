@@ -679,18 +679,30 @@
     // ============================================
 
     async function saveRequestsToFirebase(monthKey, staffUid, data) {
-        try {
-            const docRef = firestore.collection('requests').doc(monthKey);
-            await docRef.set({
-                [staffUid]: data
-            }, { merge: true });
-            
-            console.log('希望データ保存完了:', monthKey, staffUid);
-        } catch (error) {
-            console.error('希望データ保存エラー:', error);
-            throw error;
-        }
-    }
+        try {
+            const docRef = firestore.collection('requests').doc(monthKey);
+            
+            // ★ 修正 ★
+            // .set(..., { merge: true }) から .update() に変更します
+            // これにより、指定した職員のデータ(staffUid)が丸ごと置き換わります
+            await docRef.update({
+                [staffUid]: data
+            });
+            
+            console.log('希望データ保存完了:', monthKey, staffUid);
+        } catch (error) {
+            // もし requests/2025-12 ドキュメント自体が存在しない場合、
+            // update() は失敗するため、代わりに set() で作成します。
+            if (error.code === 'not-found') {
+                console.warn('ドキュメント未作成のため、set() で新規作成します');
+                const docRef = firestore.collection('requests').doc(monthKey);
+                await docRef.set({ [staffUid]: data });
+            } else {
+                console.error('希望データ保存エラー:', error);
+                throw error;
+            }
+        }
+    }
 
     /* --- 🔽 JS 修正 1/4 🔽 --- */
     async function loadUserRequests() {
