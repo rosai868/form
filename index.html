@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>7西シフト希望</title>
+    <title>シフト希望管理システム (Firebase版)</title>
     
     <script src="firebase-config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -12,7 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     
     <style>
-        /* (CSS変更点 3/3) */
+        /* (CSS ★デザイン全面変更版★) */
         * {
             margin: 0;
             padding: 0;
@@ -20,34 +20,38 @@
         }
 
         body {
-            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
-            background: #f4f7f6;
+            /* ★ 優しく温かみのあるオフホワイト */
+            font-family: "Yu Gothic", YuGothic, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background: #FFFBF7; 
             padding: 20px;
-            color: #333;
+            color: #5D4037; /* ★ 柔らかいダークブラウン */
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             background: #ffffff;
-            border-radius: 8px;
+            border-radius: 12px; /* ★ 角丸を大きく */
             padding: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            border: 1px solid #e0e0e0;
+            /* ★ 柔らかい影 */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+            border: 1px solid #F0EAE4;
         }
 
         h1 {
             text-align: center;
-            color: #2c3e50;
+            color: #5D4037;
             margin-bottom: 30px;
             font-size: 24px;
+            font-weight: 600;
         }
 
         h2 {
             text-align: center;
-            color: #34495e;
+            color: #5D4037;
             margin-bottom: 20px;
             font-size: 20px;
+            font-weight: 500;
         }
 
         .hidden {
@@ -58,7 +62,7 @@
             text-align: center;
             padding: 50px;
             font-size: 18px;
-            color: #666;
+            color: #777;
         }
 
         .login-container {
@@ -72,9 +76,9 @@
 
         label {
             display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: bold;
+            margin-bottom: 8px;
+            color: #5D4037;
+            font-weight: 600;
         }
 
         input[type="text"],
@@ -82,25 +86,26 @@
         select {
             width: 100%;
             padding: 12px;
-            border: 1px solid #dde1e3;
-            border-radius: 4px;
+            border: 1px solid #F0EAE4;
+            border-radius: 8px; /* ★ 角丸 */
             font-size: 14px;
-            background: #fdfdfd;
+            background: #FFFBF7;
+            color: #5D4037;
         }
 
         input:focus {
             outline: none;
-            border-color: #005A9C;
-            box-shadow: 0 0 0 2px rgba(0,90,156,0.1);
+            border-color: #80CBC4; /* ★ メインカラー (ミント) */
+            box-shadow: 0 0 0 3px rgba(128, 203, 196, 0.2);
         }
 
         button {
             width: 100%;
             padding: 12px;
-            background: #005A9C;
+            background: #80CBC4; /* ★ メインカラー (ミント) */
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px; /* ★ 角丸 */
             font-size: 16px;
             cursor: pointer;
             font-weight: bold;
@@ -108,7 +113,7 @@
         }
 
         button:hover {
-            background: #004a80;
+            background: #4DB6AC; /* ★ 少し濃いミント */
         }
 
         button:disabled {
@@ -117,11 +122,11 @@
         }
 
         .timer {
-            background: #f5f5f5;
-            border: 1px solid #ddd;
-            color: #666;
+            background: #F8F8F8;
+            border: 1px solid #F0EAE4;
+            color: #777;
             padding: 12px;
-            border-radius: 4px;
+            border-radius: 8px;
             margin-bottom: 15px;
             text-align: right;
             font-size: 12px;
@@ -129,9 +134,9 @@
 
         .timer-display {
             font-size: 14px;
-            font-weight: normal;
+            font-weight: 600;
             margin-top: 5px;
-            color: #333;
+            color: #5D4037;
         }
 
         .calendar-header {
@@ -140,54 +145,53 @@
             align-items: center;
             margin-bottom: 20px;
             padding: 15px;
-            background: #f5f5f5;
+            background: #F8F8F8;
             border-radius: 8px;
         }
 
         .calendar-header button {
             width: auto;
             padding: 8px 20px;
-            background: #6c757d;
+            background: #B0BEC5; /* ★ 優しいグレー */
         }
 
         .calendar-header button:hover {
-            background: #5a6268;
+            background: #90A4AE;
         }
 
         #calendar {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 2px;
-            background: #ddd;
-            padding: 2px;
-            border-radius: 4px;
+            gap: 1px; /* ★ セルの隙間を細く */
+            background: #E0E0E0;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            overflow: hidden; /* 角丸を効かせるため */
         }
 
         .weekday-header {
-            background: #343a40;
+            background: #00897B; /* ★ 濃いティール */
             color: white;
             padding: 10px 5px;
             text-align: center;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 12px;
         }
 
         .weekday-header.sunday {
-            background: #dc3545;
+            background: #E57373; /* ★ 優しい赤 */
         }
 
         .weekday-header.saturday {
-            background: #007bff;
+            background: #64B5F6; /* ★ 優しい青 */
         }
 
-        /* ★ 修正 ★ (UI改善: カレンダーセル) */
+        /* ★ UI改善: カレンダーセル */
         .calendar-day {
             background: white;
-            height: 65px;
+            height: 70px; /* ★ 高さを70pxに */
             display: flex;
             flex-direction: column;
-            justify-content: center; /* ★ 中央揃え (上下) */
-            align-items: center;     /* ★ 中央揃え (左右) */
             cursor: pointer;
             position: relative; 
             user-select: none;
@@ -199,80 +203,77 @@
         }
 
         .calendar-day:hover:not(.disabled):not(.empty) {
-            background: #f0f7ff;
+            background: #E0F2F1;
         }
 
         .calendar-day.empty {
-            background: #f4f7f6;
+            background: #F4F7F6;
             cursor: default;
             border: none;
         }
 
         .calendar-day.sunday {
-            background: #fdf2f2;
+            background: #FFFBF7;
         }
 
         .calendar-day.saturday {
-            background: #f0f7ff;
+            background: #F4F7FF;
         }
 
         .calendar-day.holiday {
-            background: #fff5f5;
+            background: #FFFBF7;
         }
 
         .calendar-day.disabled {
-            background: #f0f0f0;
-            color: #aaa;
+            background: #F5F5F5;
+            color: #BDBDBD;
             cursor: not-allowed;
         }
-
-        .calendar-day.selected-休 {
-            border-color: #dc3545;
-            background-color: #fdf2f2;
-        }
-        .calendar-day.selected-年 {
-            border-color: #007bff;
-            background-color: #f0f7ff;
-        }
-        .calendar-day.selected-出 {
-            border-color: #fd7e14;
-            background-color: #fff8f0;
-        }
-        .calendar-day.selected-日 {
-            border-color: #28a745;
-            background-color: #f0fff4;
-        }
-
-        /* ★ 修正 ★ (UI改善: 日付の数字) */
+        
+        /* ★ UI改善: 日付の数字 (左上) */
         .calendar-day-number {
-            font-size: 18px; /* ★ 16pxから18pxに拡大 */
-            font-weight: bold;
-            position: static; /* ★ absoluteからstaticに変更 */
-            color: #555; 
-            /* top, right 削除 */
+            font-size: 15px; 
+            font-weight: 600;
+            position: absolute; 
+            top: 5px;
+            left: 8px;
+            color: #777; 
         }
 
-        /* ★ 修正 ★ (UI改善: 希望バッジ) */
+        /* ★ UI改善: 希望バッジ (右下・円形) */
         .calendar-day-request {
-            position: static; /* ★ absoluteからstaticに変更 */
-            margin-top: 4px;  /* ★ 上の数字とのマージン */
-            /* bottom, left 削除 */
+            position: absolute;
+            bottom: 5px; 
+            right: 5px;   
             font-size: 11px;
-            padding: 1px 4px;
-            border-radius: 3px;
-            font-weight: 600;
+            font-weight: 700;
+            /* ★ 円形にする */
+            height: 22px;
+            width: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
+        
+        /* ★ カレンダーの色分け (淡い色) */
         .request-type-休 {
-            color: #dc3545; background: #fdf2f2; border: 1px solid #dc3545;
+            color: #EF5350; background: #FFEBEE; border: 1px solid #FFCDD2;
         }
         .request-type-年 {
-            color: #007bff; background: #f0f7ff; border: 1px solid #007bff;
+            color: #42A5F5; background: #E3F2FD; border: 1px solid #BBDEFB;
         }
         .request-type-出 {
-            color: #fd7e14; background: #fff8f0; border: 1px solid #fd7e14;
+            color: #FFA726; background: #FFF8E1; border: 1px solid #FFE0B2;
         }
         .request-type-日 {
-            color: #28a745; background: #f0fff4; border: 1px solid #28a745;
+            color: #66BB6A; background: #E8F5E9; border: 1px solid #C8E6C9;
+        }
+
+        /* ★ カレンダーの選択枠線 (色分けしない、メインカラーで統一) */
+        .calendar-day.selected {
+            border-color: #80CBC4; /* ★ メインカラー (ミント) */
+            background-color: #F0FAF9;
         }
 
         .request-buttons {
@@ -285,68 +286,73 @@
         .request-button {
             padding: 15px 10px;
             text-align: center;
-            border: 2px solid #dde1e3;
-            border-radius: 4px;
+            border: 2px solid #E0E0E0;
+            border-radius: 8px; /* ★ 角丸 */
             cursor: pointer;
             background: white;
-            font-weight: bold;
+            font-weight: 600;
+            color: #5D4037;
             transition: all 0.2s;
         }
 
         .request-button:hover:not(.active) {
-            background: #f5f5f5;
-            border-color: #b0b0b0;
+            background: #F8F8F8;
+            border-color: #BDBDBD;
         }
-
+        
+        /* ★ アクティブなボタンの色分け (淡い色) */
         .request-button.active[data-type="休"] {
-            background-color: #dc3545; border-color: #dc3545; color: white;
+            background-color: #FFEBEE; border-color: #EF5350; color: #EF5350;
         }
         .request-button.active[data-type="年"] {
-            background-color: #007bff; border-color: #007bff; color: white;
+            background-color: #E3F2FD; border-color: #42A5F5; color: #42A5F5;
         }
         .request-button.active[data-type="出"] {
-            background-color: #fd7e14; border-color: #fd7e14; color: white;
+            background-color: #FFF8E1; border-color: #FFA726; color: #FFA726;
         }
         .request-button.active[data-type="日"] {
-            background-color: #28a745; border-color: #28a745; color: white;
+            background-color: #E8F5E9; border-color: #66BB6A; color: #66BB6A;
         }
+
 
         .selected-dates {
             margin-top: 20px;
             padding: 15px;
-            background: #f5f5f5;
-            border-radius: 4px;
+            background: #F8F8F8;
+            border-radius: 8px;
+            border: 1px solid #F0EAE4;
         }
 
         .selected-date-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px;
+            padding: 8px 12px;
             margin: 5px 0;
             background: white;
-            border-radius: 4px;
-            border: 1px solid #ddd;
+            border-radius: 6px;
+            border: 1px solid #E0E0E0;
         }
         
         .selected-date-item button {
             width: auto;
             padding: 5px 15px;
-            background: #dc3545;
+            background: #FFAB91; /* ★ アクセント (コーラル) */
             font-size: 12px;
+            border-radius: 6px;
         }
         .selected-date-item button:hover {
-            background: #c82333;
+            background: #FF8A65;
         }
 
         .error-message {
-            color: #dc3545;
+            color: #EF5350; /* ★ */
             margin-top: 10px;
             text-align: center;
         }
 
         .success-message {
-            color: #28a745;
+            color: #66BB6A; /* ★ */
             margin-top: 10px;
             text-align: center;
         }
@@ -354,8 +360,8 @@
         .admin-table-container {
             overflow-x: auto;
             margin-top: 20px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
         }
 
         .admin-table {
@@ -365,23 +371,24 @@
         }
 
         .admin-table th, .admin-table td {
-            border: 1px solid #ddd;
-            padding: 5px;
+            border: 1px solid #E0E0E0;
+            padding: 8px 5px; /* ★ パディングを少し調整 */
             text-align: center;
         }
 
         .admin-table th {
-            background: #343a40;
+            background: #80CBC4; /* ★ メインカラー (ミント) */
             color: white;
-            font-weight: bold;
+            font-weight: 600;
             position: sticky;
             top: 0;
+            border-color: #80CBC4;
         }
 
         .admin-table td:first-child {
             text-align: center;
             font-weight: bold;
-            background: #f5f5f5;
+            background: #F8F8F8;
             position: sticky;
             left: 0;
             min-width: 30px;
@@ -389,7 +396,7 @@
         .admin-table td:nth-child(2) {
             text-align: center;
             font-weight: bold;
-            background: #f5f5f5;
+            background: #F8F8F8;
             position: sticky;
             left: 30px;
             min-width: 35px;
@@ -398,7 +405,7 @@
             text-align: left;
             padding-left: 10px;
             font-weight: bold;
-            background: #f5f5f5;
+            background: #F8F8F8;
             position: sticky;
             left: 65px;
             min-width: 75px;
@@ -406,20 +413,21 @@
         }
 
         .logout-button {
-            background: #dc3545;
+            background: #FFAB91; /* ★ アクセント (コーラル) */
             margin-top: 20px;
         }
 
         .logout-button:hover {
-            background: #c82333;
+            background: #FF8A65;
         }
         
         .password-change-button {
-            background: #fd7e14;
+            background: #FFD54F; /* ★ アクセント (黄) */
+            color: #5D4037;
             margin-top: 10px;
         }
         .password-change-button:hover {
-            background: #e66a01;
+            background: #FFCA28;
         }
 
         .sync-status {
@@ -427,7 +435,7 @@
             bottom: 20px;
             right: 20px;
             padding: 10px 20px;
-            background: #28a745;
+            background: #66BB6A;
             color: white;
             border-radius: 20px;
             font-size: 12px;
@@ -435,11 +443,11 @@
         }
 
         .sync-status.offline {
-            background: #dc3545;
+            background: #EF5350;
         }
 
         .sync-status.syncing {
-            background: #FF9800;
+            background: #FFA726;
         }
     </style>
 </head>
@@ -453,7 +461,7 @@
     </div>
 
     <div id="loginSection" class="container login-container hidden">
-        <h1>7西シフト希望</h1>
+        <h1>シフト希望管理システム</h1>
         <div class="form-group">
             <label for="userId">ID</label>
             <input type="text" id="userId" placeholder="IDを入力">
@@ -463,7 +471,7 @@
             <input type="password" id="password" placeholder="パスワードを入力">
         </div>
         <button onclick="login()" id="loginButton">ログイン</button>
-        <div style="margin-top: 20px; padding: 15px; background: #f9f9f9; border-radius: 4px; font-size: 12px; color: #666; line-height: 1.6;">
+        <div style="margin-top: 20px; padding: 15px; background: #FFFBF7; border-radius: 8px; font-size: 12px; color: #777; line-height: 1.6;">
             <p style="margin: 5px 0;">※ ID・パスワードを忘れた場合は師長に連絡してください</p>
             <p style="margin: 5px 0;">※ 締め切りは毎月7日です</p>
         </div>
@@ -561,8 +569,8 @@
 
         <button onclick="exportToCSV()" style="margin-top: 20px;">CSVエクスポート</button>
         
-        <div style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 4px; font-size: 13px; color: #333;">
-            <h3 style="font-size: 16px; margin-bottom: 15px;">🔒 職員のパスワードリセット</h3>
+        <div style="margin-top: 30px; padding: 20px; background: #F8F8F8; border: 1px solid #F0EAE4; border-radius: 8px; font-size: 13px; color: #777;">
+            <h3 style="font-size: 16px; margin-bottom: 15px; color: #5D4037;">🔒 職員のパスワードリセット</h3>
             <p>
                 職員がパスワードを忘れた場合は、
                 <strong>Firebaseコンソールの「Authentication」</strong>
@@ -599,7 +607,7 @@
             auth = firebase.auth();
             firestore = firebase.firestore();
 
-            // ★ 修正 ★ (キャッシュ無効化)
+            // ★ キャッシュ無効化
             firestore.settings({ persistence: false });
 
             db = firebase.database();
@@ -626,8 +634,8 @@
     let selectedDates = {};
     let selectedRequestType = null;
     
-    // ★ 修正 ★ (ログアウト警告用)
-    let originalSelectedDates = {}; // サーバーから読み込んだ状態を保存する
+    // ★ ログアウト警告用
+    let originalSelectedDates = {}; 
     
     let staffListForAdmin = []; 
     let allRequestsForAdmin = {}; 
@@ -650,7 +658,7 @@
             const userCredential = await auth.signInWithEmailAndPassword(email, password);
             const user = userCredential.user;
 
-            const staffDoc = await firestore.collection('staff').doc(user.uid).get({ source: 'server' }); // ★ キャッシュ無視
+            const staffDoc = await firestore.collection('staff').doc(user.uid).get({ source: 'server' }); 
 
             if (!staffDoc.exists) {
                 throw new Error('職員名簿に情報が見つかりません。');
@@ -736,16 +744,13 @@
         }
     }
 
-    /* --- 🔽 JS 修正 (ログアウト警告) 🔽 --- */
-    // 変更が未保存かチェックする関数
+    // ★ ログアウト警告用 (関数追加)
     function hasUnsavedChanges() {
-        if (!currentUser) return false; // ログイン前はチェックしない
+        if (!currentUser) return false;
         
-        // キーの数が違う時点で「変更あり」
         if (Object.keys(selectedDates).length !== Object.keys(originalSelectedDates).length) {
             return true;
         }
-        // キーの中身をチェック
         for (const date in selectedDates) {
             if (selectedDates[date] !== originalSelectedDates[date]) {
                 return true;
@@ -758,7 +763,7 @@
         // ★ ログアウト警告チェック
         if (hasUnsavedChanges()) {
             if (!confirm('変更された希望が提出されていません。\n保存せずにログアウトしますか？')) {
-                return; // ログアウトをキャンセル
+                return; // キャンセル
             }
         }
         
@@ -783,7 +788,6 @@
         document.getElementById('changePasswordSection').classList.add('hidden');
         document.getElementById('syncStatus').classList.add('hidden');
     }
-    /* --- 🔼 JS 修正 🔼 --- */
 
 
     // ============================================
@@ -802,7 +806,7 @@
         document.getElementById('mainSection').classList.remove('hidden');
         document.getElementById('syncStatus').classList.remove('hidden');
         
-        document.getElementById('welcomeMessage').textContent = currentUser.name + 'さん、お疲れ様です';
+        document.getElementById('welcomeMessage').textContent = currentUser.name + 'さん、こんにちは';
 
         if (currentUser.isAdmin === true) {
             document.getElementById('adminButton').classList.remove('hidden');
@@ -976,7 +980,7 @@
         const sortedDates = Object.keys(selectedDates).sort();
         
         if (sortedDates.length === 0) {
-            list.innerHTML = '<p style="color: #999;">選択された日付はありません</p>';
+            list.innerHTML = '<p style="color: #777;">選択された日付はありません</p>';
             return;
         }
         
@@ -1038,25 +1042,20 @@
     // 希望管理 (Firestore版)
     // ============================================
 
-    /* --- 🔽 JS 修正 (書き込み方法の変更) 🔽 --- */
     async function saveRequestsToFirebase(monthKey, staffUid, data) {
         try {
             const docRef = firestore.collection('requests').doc(monthKey);
             
-            // ★ .set(..., { merge: true }) から .update() に変更
-            // これにより、指定した職員のデータ(staffUid)が丸ごと置き換わる
+            // ★ 修正 ★ (updateで丸ごと置き換え)
             await docRef.update({
                 [staffUid]: data
             });
             
             console.log('希望データ保存完了 (update):', monthKey, staffUid);
         } catch (error) {
-            // もし requests/2025-12 ドキュメント自体が存在しない(＝その月の最初の提出)場合、
-            // update() は失敗するため、代わりに set() で作成します。
             if (error.code === 'not-found') {
                 console.warn('ドキュメント未作成のため、set() で新規作成します');
                 const docRef = firestore.collection('requests').doc(monthKey);
-                // ★ merge:true を使い、他の職員のデータを消さずに追記する
                 await docRef.set({ [staffUid]: data }, { merge: true });
                 console.log('希望データ保存完了 (set):', monthKey, staffUid);
             } else {
@@ -1065,10 +1064,7 @@
             }
         }
     }
-    /* --- 🔼 JS 修正 🔼 --- */
 
-
-    /* --- 🔽 JS 修正 (キャッシュ対応) 🔽 --- */
     async function loadUserRequests() {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth() + 1;
@@ -1084,7 +1080,7 @@
                 selectedDates = {}; 
             }
             
-            // ★ ログアウト警告用に、読み込んだ状態をディープコピーして保存
+            // ★ ログアウト警告用に、読み込んだ状態をディープコピー
             originalSelectedDates = JSON.parse(JSON.stringify(selectedDates));
 
         } catch (error) {
@@ -1095,10 +1091,7 @@
         
         updateSelectedDatesList();
     }
-    /* --- 🔼 JS 修正 🔼 --- */
 
-
-    /* --- 🔽 JS 修正 (ポップアップ通知) 🔽 --- */
     async function submitRequests() {
         if (Object.keys(selectedDates).length === 0) {
             if (!confirm('希望が選択されていません。空の希望（希望なし）として提出しますか？')) {
@@ -1128,7 +1121,7 @@
             
             await saveRequestsToFirebase(monthKey, currentUser.uid, data);
             
-            // ★ ポップアップに変更
+            // ★ ポップアップ通知
             alert('希望が提出されました！');
             
             // ★ ログアウト警告用に、保存成功した状態をオリジナルとして記憶
@@ -1136,18 +1129,13 @@
             
             await updateSubmissionStatus();
 
-            // ★ submitMessage は使わないので削除
-
         } catch (error) {
-             // ★ ポップアップに変更
              alert('提出エラー: ' + error.message);
         } finally {
             submitButton.disabled = false;
             submitButton.textContent = '希望を提出';
         }
     }
-    /* --- 🔼 JS 修正 🔼 --- */
-
 
     async function updateSubmissionStatus() {
         const year = currentMonth.getFullYear();
@@ -1179,11 +1167,11 @@
             const percentage = (totalStaff > 0) ? Math.round((submitted.length / totalStaff) * 100) : 0;
             
             document.getElementById('submissionStatusContent').innerHTML = 
-               '<div style="background: #e8f5e9; padding: 10px; border-radius: 4px; margin-bottom: 10px;">' +
+               '<div style="background: #E8F5E9; padding: 10px; border-radius: 8px; margin-bottom: 10px;">' +
                '<strong>提出済み (' + submitted.length + '名):</strong> ' + 
                (submitted.length > 0 ? submitted.join('、') : 'なし') +
                '</div>' +
-               '<div style="background: #fdf2f2; padding: 10px; border-radius: 4px;">' +
+               '<div style="background: #FFEBEE; padding: 10px; border-radius: 8px;">' +
                '<strong>未提出 (' + notSubmitted.length + '名):</strong> ' + 
                (notSubmitted.length > 0 ? notSubmitted.join('、') : 'なし') +
                '</div>' +
@@ -1192,7 +1180,7 @@
         } catch (error) {
             console.error("提出状況の取得エラー:", error);
             document.getElementById('submissionStatusContent').innerHTML = 
-                '<span style="color: red;">提出状況の取得に失敗しました (エラー: ' + error.message + ')</span>';
+                '<span style="color: #EF5350;">提出状況の取得に失敗しました (エラー: ' + error.message + ')</span>';
         }
     }
 
@@ -1259,10 +1247,10 @@
                     
                     let cellStyle = '';
                     switch(cellContent) {
-                        case '休': cellStyle = 'background: #fdf2f2;'; break;
-                        case '年': cellStyle = 'background: #f0f7ff;'; break;
-                        case '出': cellStyle = 'background: #fff8f0;'; break;
-                        case '日': cellStyle = 'background: #f0fff4;'; break;
+                        case '休': cellStyle = 'background: #FFEBEE;'; break;
+                        case '年': cellStyle = 'background: #E3F2FD;'; break;
+                        case '出': cellStyle = 'background: #FFF8E1;'; break;
+                        case '日': cellStyle = 'background: #E8F5E9;'; break;
                     }
                     row += `<td style="${cellStyle}">${cellContent}</td>`;
                 }
@@ -1384,12 +1372,11 @@
                 }
             });
             
-            // ★ 修正 ★ (ページを閉じる/移動する時の警告)
+            // ★ ページを閉じる/移動する時の警告
             window.addEventListener('beforeunload', (event) => {
                 if (currentUser && hasUnsavedChanges()) {
-                    // 警告メッセージを表示
                     event.preventDefault();
-                    event.returnValue = ''; // (ブラウザ標準の警告文が表示されます)
+                    event.returnValue = ''; 
                 }
             });
             
