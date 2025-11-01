@@ -1056,7 +1056,7 @@
         const monthKey = year + '-' + String(month).padStart(2, '0');
         
         try {
-            const doc = await firestore.collection('requests').doc(monthKey).get();
+            const doc = await firestore.collection('requests').doc(monthKey).get({ source: 'server' });
             
             if (doc.exists && doc.data()[currentUser.uid]) {
                 const submission = doc.data()[currentUser.uid];
@@ -1138,6 +1138,8 @@
             const notSubmitted = [];
 
             for (const staff of allStaff) {
+                if (staff.originalId === 31) continue;
+                
                 // ★ JS側で管理者をスキップする処理を追加
                 if (monthRequests[staff.uid]) {
                     submitted.push(staff.name);
