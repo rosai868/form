@@ -1127,11 +1127,11 @@
 
         try {
             // ★ .where() を削除
-            const staffSnapshot = await firestore.collection('staff').get();
+            const staffSnapshot = await firestore.collection('staff').get({ source: 'server' });
             
             const allStaff = staffSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
             
-            const requestsDoc = await firestore.collection('requests').doc(monthKey).get();
+            const requestsDoc = await firestore.collection('requests').doc(monthKey).get({ source: 'server' });
             const monthRequests = requestsDoc.exists ? requestsDoc.data() : {};
 
             const submitted = [];
@@ -1194,14 +1194,14 @@
         
         try {
             // ★ .orderBy() を削除
-            const staffSnapshot = await firestore.collection('staff').get();
+            const staffSnapshot = await firestore.collection('staff').get({ source: 'server' });
                 
             staffListForAdmin = staffSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
             
             // ★ JS側で並べ替える処理を追加
             staffListForAdmin.sort((a, b) => (a.originalId || 0) - (b.originalId || 0));
 
-            const requestsDoc = await firestore.collection('requests').doc(monthKey).get();
+            const requestsDoc = await firestore.collection('requests').doc(monthKey).get({ source: 'server' });
             allRequestsForAdmin = requestsDoc.exists ? requestsDoc.data() : {};
             
             const header = document.getElementById('adminTableHeader');
