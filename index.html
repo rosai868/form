@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>シフト希望管理システム (Firebase版)</title>
+    <title>7西シフト希望</title>
     
     <script src="firebase-config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -12,76 +12,435 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     
     <style>
-        /* (CSSは変更なし) */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
-        .container { max-width: 1200px; margin: 0 auto; background: #ffffff; border-radius: 8px; padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e0e0e0; }
-        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; font-size: 24px; }
-        h2 { text-align: center; color: #34495e; margin-bottom: 20px; font-size: 20px; }
-        .hidden { display: none !important; }
-        .loading { text-align: center; padding: 50px; font-size: 18px; color: #666; }
-        .login-container { max-width: 400px; margin: 50px auto; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 5px; color: #555; font-weight: bold; }
-        input[type="text"], input[type="password"], select { width: 100%; padding: 12px; border: 1px solid #dde1e3; border-radius: 4px; font-size: 14px; background: #fdfdfd; }
-        input:focus { outline: none; border-color: #005A9C; box-shadow: 0 0 0 2px rgba(0,90,156,0.1); }
-        button { width: 100%; padding: 12px; background: #005A9C; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
-        button:hover { background: #004a80; }
-        button:disabled { background: #cccccc; cursor: not-allowed; }
-        .timer { background: #f5f5f5; border: 1px solid #ddd; color: #666; padding: 12px; border-radius: 4px; margin-bottom: 15px; text-align: right; font-size: 12px; }
-        .timer-display { font-size: 14px; font-weight: normal; margin-top: 5px; color: #333; }
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px; }
-        .calendar-header button { width: auto; padding: 8px 20px; background: #6c757d; }
-        .calendar-header button:hover { background: #5a6268; }
-        #calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: #ddd; padding: 2px; border-radius: 4px; }
-        .weekday-header { background: #343a40; color: white; padding: 10px 5px; text-align: center; font-weight: bold; font-size: 12px; }
-        .weekday-header.sunday { background: #dc3545; }
-        .weekday-header.saturday { background: #007bff; }
-        .calendar-day { background: white; height: 65px; display: flex; flex-direction: column; cursor: pointer; position: relative; user-select: none; transition: background 0.2s; border: 2px solid transparent; }
-        .calendar-day.selected { box-sizing: border-box; }
-        .calendar-day:hover:not(.disabled):not(.empty) { background: #f0f7ff; }
-        .calendar-day.empty { background: #f4f7f6; cursor: default; border: none; }
-        .calendar-day.sunday { background: #fdf2f2; }
-        .calendar-day.saturday { background: #f0f7ff; }
-        .calendar-day.holiday { background: #fff5f5; }
-        .calendar-day.disabled { background: #f0f0f0; color: #aaa; cursor: not-allowed; }
-        .calendar-day.selected-休 { border-color: #dc3545; background-color: #fdf2f2; }
-        .calendar-day.selected-年 { border-color: #007bff; background-color: #f0f7ff; }
-        .calendar-day.selected-出 { border-color: #fd7e14; background-color: #fff8f0; }
-        .calendar-day.selected-日 { border-color: #28a745; background-color: #f0fff4; }
-        .calendar-day-number { font-size: 16px; font-weight: bold; position: absolute; top: 4px; right: 4px; color: #555; }
-        .calendar-day-request { position: absolute; bottom: 4px; left: 4px; font-size: 11px; padding: 1px 4px; border-radius: 3px; font-weight: 600; }
-        .request-type-休 { color: #dc3545; background: #fdf2f2; border: 1px solid #dc3545; }
-        .request-type-年 { color: #007bff; background: #f0f7ff; border: 1px solid #007bff; }
-        .request-type-出 { color: #fd7e14; background: #fff8f0; border: 1px solid #fd7e14; }
-        .request-type-日 { color: #28a745; background: #f0fff4; border: 1px solid #28a745; }
-        .request-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 20px 0; }
-        .request-button { padding: 15px 10px; text-align: center; border: 2px solid #dde1e3; border-radius: 4px; cursor: pointer; background: white; font-weight: bold; transition: all 0.2s; }
-        .request-button:hover:not(.active) { background: #f5f5f5; border-color: #b0b0b0; }
-        .request-button.active[data-type="休"] { background-color: #dc3545; border-color: #dc3545; color: white; }
-        .request-button.active[data-type="年"] { background-color: #007bff; border-color: #007bff; color: white; }
-        .request-button.active[data-type="出"] { background-color: #fd7e14; border-color: #fd7e14; color: white; }
-        .request-button.active[data-type="日"] { background-color: #28a745; border-color: #28a745; color: white; }
-        .selected-dates { margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 4px; }
-        .selected-date-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; margin: 5px 0; background: white; border-radius: 4px; border: 1px solid #ddd; }
-        .selected-date-item button { width: auto; padding: 5px 15px; background: #dc3545; font-size: 12px; }
-        .selected-date-item button:hover { background: #c82333; }
-        .error-message { color: #dc3545; margin-top: 10px; text-align: center; }
-        .success-message { color: #28a745; margin-top: 10px; text-align: center; }
-        .admin-table-container { overflow-x: auto; margin-top: 20px; border: 1px solid #ddd; border-radius: 4px; }
-        .admin-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        .admin-table th, .admin-table td { border: 1px solid #ddd; padding: 5px; text-align: center; }
-        .admin-table th { background: #343a40; color: white; font-weight: bold; position: sticky; top: 0; }
-        .admin-table td:first-child { text-align: center; font-weight: bold; background: #f5f5f5; position: sticky; left: 0; min-width: 30px; }
-        .admin-table td:nth-child(2) { text-align: center; font-weight: bold; background: #f5f5f5; position: sticky; left: 30px; min-width: 35px; }
-        .admin-table td:nth-child(3) { text-align: left; padding-left: 10px; font-weight: bold; background: #f5f5f5; position: sticky; left: 65px; min-width: 75px; white-space: nowrap; }
-        .logout-button { background: #dc3545; margin-top: 20px; }
-        .logout-button:hover { background: #c82333; }
-        .password-change-button { background: #fd7e14; margin-top: 10px; }
-        .password-change-button:hover { background: #e66a01; }
-        .sync-status { position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: #28a745; color: white; border-radius: 20px; font-size: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .sync-status.offline { background: #dc3545; }
-        .sync-status.syncing { background: #FF9800; }
+        /* (CSS変更点 3/3) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background: #f4f7f6;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #34495e;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dde1e3;
+            border-radius: 4px;
+            font-size: 14px;
+            background: #fdfdfd;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #005A9C;
+            box-shadow: 0 0 0 2px rgba(0,90,156,0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #005A9C;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #004a80;
+        }
+
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .timer {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            color: #666;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            text-align: right;
+            font-size: 12px;
+        }
+
+        .timer-display {
+            font-size: 14px;
+            font-weight: normal;
+            margin-top: 5px;
+            color: #333;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .calendar-header button {
+            width: auto;
+            padding: 8px 20px;
+            background: #6c757d;
+        }
+
+        .calendar-header button:hover {
+            background: #5a6268;
+        }
+
+        #calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            background: #ddd;
+            padding: 2px;
+            border-radius: 4px;
+        }
+
+        .weekday-header {
+            background: #343a40;
+            color: white;
+            padding: 10px 5px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .weekday-header.sunday {
+            background: #dc3545;
+        }
+
+        .weekday-header.saturday {
+            background: #007bff;
+        }
+
+        /* ★ 修正 ★ (UI改善: カレンダーセル) */
+        .calendar-day {
+            background: white;
+            height: 65px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* ★ 中央揃え (上下) */
+            align-items: center;     /* ★ 中央揃え (左右) */
+            cursor: pointer;
+            position: relative; 
+            user-select: none;
+            transition: background 0.2s;
+            border: 2px solid transparent;
+        }
+        .calendar-day.selected {
+             box-sizing: border-box; 
+        }
+
+        .calendar-day:hover:not(.disabled):not(.empty) {
+            background: #f0f7ff;
+        }
+
+        .calendar-day.empty {
+            background: #f4f7f6;
+            cursor: default;
+            border: none;
+        }
+
+        .calendar-day.sunday {
+            background: #fdf2f2;
+        }
+
+        .calendar-day.saturday {
+            background: #f0f7ff;
+        }
+
+        .calendar-day.holiday {
+            background: #fff5f5;
+        }
+
+        .calendar-day.disabled {
+            background: #f0f0f0;
+            color: #aaa;
+            cursor: not-allowed;
+        }
+
+        .calendar-day.selected-休 {
+            border-color: #dc3545;
+            background-color: #fdf2f2;
+        }
+        .calendar-day.selected-年 {
+            border-color: #007bff;
+            background-color: #f0f7ff;
+        }
+        .calendar-day.selected-出 {
+            border-color: #fd7e14;
+            background-color: #fff8f0;
+        }
+        .calendar-day.selected-日 {
+            border-color: #28a745;
+            background-color: #f0fff4;
+        }
+
+        /* ★ 修正 ★ (UI改善: 日付の数字) */
+        .calendar-day-number {
+            font-size: 18px; /* ★ 16pxから18pxに拡大 */
+            font-weight: bold;
+            position: static; /* ★ absoluteからstaticに変更 */
+            color: #555; 
+            /* top, right 削除 */
+        }
+
+        /* ★ 修正 ★ (UI改善: 希望バッジ) */
+        .calendar-day-request {
+            position: static; /* ★ absoluteからstaticに変更 */
+            margin-top: 4px;  /* ★ 上の数字とのマージン */
+            /* bottom, left 削除 */
+            font-size: 11px;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: 600;
+        }
+        .request-type-休 {
+            color: #dc3545; background: #fdf2f2; border: 1px solid #dc3545;
+        }
+        .request-type-年 {
+            color: #007bff; background: #f0f7ff; border: 1px solid #007bff;
+        }
+        .request-type-出 {
+            color: #fd7e14; background: #fff8f0; border: 1px solid #fd7e14;
+        }
+        .request-type-日 {
+            color: #28a745; background: #f0fff4; border: 1px solid #28a745;
+        }
+
+        .request-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .request-button {
+            padding: 15px 10px;
+            text-align: center;
+            border: 2px solid #dde1e3;
+            border-radius: 4px;
+            cursor: pointer;
+            background: white;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .request-button:hover:not(.active) {
+            background: #f5f5f5;
+            border-color: #b0b0b0;
+        }
+
+        .request-button.active[data-type="休"] {
+            background-color: #dc3545; border-color: #dc3545; color: white;
+        }
+        .request-button.active[data-type="年"] {
+            background-color: #007bff; border-color: #007bff; color: white;
+        }
+        .request-button.active[data-type="出"] {
+            background-color: #fd7e14; border-color: #fd7e14; color: white;
+        }
+        .request-button.active[data-type="日"] {
+            background-color: #28a745; border-color: #28a745; color: white;
+        }
+
+        .selected-dates {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+
+        .selected-date-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        
+        .selected-date-item button {
+            width: auto;
+            padding: 5px 15px;
+            background: #dc3545;
+            font-size: 12px;
+        }
+        .selected-date-item button:hover {
+            background: #c82333;
+        }
+
+        .error-message {
+            color: #dc3545;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .success-message {
+            color: #28a745;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .admin-table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .admin-table th, .admin-table td {
+            border: 1px solid #ddd;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .admin-table th {
+            background: #343a40;
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        .admin-table td:first-child {
+            text-align: center;
+            font-weight: bold;
+            background: #f5f5f5;
+            position: sticky;
+            left: 0;
+            min-width: 30px;
+        }
+        .admin-table td:nth-child(2) {
+            text-align: center;
+            font-weight: bold;
+            background: #f5f5f5;
+            position: sticky;
+            left: 30px;
+            min-width: 35px;
+        }
+        .admin-table td:nth-child(3) {
+            text-align: left;
+            padding-left: 10px;
+            font-weight: bold;
+            background: #f5f5f5;
+            position: sticky;
+            left: 65px;
+            min-width: 75px;
+            white-space: nowrap;
+        }
+
+        .logout-button {
+            background: #dc3545;
+            margin-top: 20px;
+        }
+
+        .logout-button:hover {
+            background: #c82333;
+        }
+        
+        .password-change-button {
+            background: #fd7e14;
+            margin-top: 10px;
+        }
+        .password-change-button:hover {
+            background: #e66a01;
+        }
+
+        .sync-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border-radius: 20px;
+            font-size: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .sync-status.offline {
+            background: #dc3545;
+        }
+
+        .sync-status.syncing {
+            background: #FF9800;
+        }
     </style>
 </head>
 <body>
@@ -229,70 +588,46 @@
     let db = null;        
 
     function initializeFirebase() {
-        try {
-            if (typeof firebaseConfig === 'undefined' || !firebaseConfig.apiKey) {
-                console.error('firebase-config.js が正しく読み込まれていないか、中身が空です。');
-                alert('Firebaseの設定ファイル(firebase-config.js)が読み込めません。');
-                return false;
-            }
+        try {
+            if (typeof firebaseConfig === 'undefined' || !firebaseConfig.apiKey) {
+                console.error('firebase-config.js が正しく読み込まれていないか、中身が空です。');
+                alert('Firebaseの設定ファイル(firebase-config.js)が読み込めません。');
+                return false;
+            }
 
-            firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth();
-            firestore = firebase.firestore();
+            firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            firestore = firebase.firestore();
 
-            /* ▼▼▼ この1行を必ず追加してください ▼▼▼ */
+            // ★ 修正 ★ (キャッシュ無効化)
             firestore.settings({ persistence: false });
 
-            db = firebase.database();
-            console.log('Firebase初期化成功 (Auth, Firestore)');
-            return true;
-        } catch (error) {
-            console.error('Firebase初期化エラー:', error);
-            alert('システムの初期化に失敗しました。設定を確認してください。');
-            return false;
-        }
-    }
+            db = firebase.database();
+            console.log('Firebase初期化成功 (Auth, Firestore)');
+            return true;
+        } catch (error) {
+            console.error('Firebase初期化エラー:', error);
+            alert('システムの初期化に失敗しました。設定を確認してください。');
+            return false;
+        }
+    }
 
     // ============================================
     // グローバル変数
     // ============================================
     
     const holidays = {
-        '2025-01-01': '元日',
-        '2025-01-13': '成人の日',
-        '2025-02-11': '建国記念の日',
-        '2025-02-23': '天皇誕生日',
-        '2025-02-24': '振替休日',
-        '2025-03-20': '春分の日',
-        '2025-04-29': '昭和の日',
-        '2025-05-03': '憲法記念日',
-        '2025-05-04': 'みどりの日',
-        '2025-05-05': 'こどもの日',
-        '2025-05-06': '振替休日',
-        '2025-07-21': '海の日',
-        '2025-08-11': '山の日',
-        '2025-09-15': '敬老の日',
-        '2025-09-23': '秋分の日',
-        '2025-10-13': 'スポーツの日',
-        '2025-11-03': '文化の日',
-        '2025-11-23': '勤労感謝の日',
-        '2025-11-24': '振替休日',
-        '2026-01-01': '元日',
-        '2026-01-12': '成人の日',
-        '2026-02-11': '建国記念の日',
-        '2026-02-23': '天皇誕生日',
-        '2026-03-20': '春分の日',
-        '2026-04-29': '昭和の日',
-        '2026-05-03': '憲法記念日',
-        '2026-05-04': 'みどりの日',
-        '2026-05-05': 'こどもの日',
-        '2026-05-06': '振替休日'
+        '2025-01-01': '元日', '2025-01-13': '成人の日', '2025-02-11': '建国記念の日', '2025-02-23': '天皇誕生日', '2025-02-24': '振替休日', '2025-03-20': '春分の日', '2025-04-29': '昭和の日', '2025-05-03': '憲法記念日', '2025-05-04': 'みどりの日', '2025-05-05': 'こどもの日', '2025-05-06': '振替休日', '2025-07-21': '海の日', '2025-08-11': '山の日', '2025-09-15': '敬老の日', '2025-09-23': '秋分の日', '2025-10-13': 'スポーツの日', '2025-11-03': '文化の日', '2025-11-23': '勤労感謝の日', '2025-11-24': '振替休日',
+        '2026-01-01': '元日', '2026-01-12': '成人の日', '2026-02-11': '建国記念の日', '2026-02-23': '天皇誕生日', '2026-03-20': '春分の日', '2026-04-29': '昭和の日', '2026-05-03': '憲法記念日', '2026-05-04': 'みどりの日', '2026-05-05': 'こどもの日', '2026-05-06': '振替休日'
     };
 
     let currentUser = null; 
     let currentMonth = new Date();
     let selectedDates = {};
     let selectedRequestType = null;
+    
+    // ★ 修正 ★ (ログアウト警告用)
+    let originalSelectedDates = {}; // サーバーから読み込んだ状態を保存する
     
     let staffListForAdmin = []; 
     let allRequestsForAdmin = {}; 
@@ -306,8 +641,7 @@
         const password = document.getElementById('password').value;
         const loginButton = document.getElementById('loginButton');
         
-        // ★★★ ここのドメイン名を確認してください ★★★
-        const email = `${userId}@7w.com`; 
+        const email = `${userId}@7w.com`; // ★ ドメイン名を確認
 
         loginButton.disabled = true;
         loginButton.textContent = 'ログイン中...';
@@ -316,7 +650,7 @@
             const userCredential = await auth.signInWithEmailAndPassword(email, password);
             const user = userCredential.user;
 
-            const staffDoc = await firestore.collection('staff').doc(user.uid).get();
+            const staffDoc = await firestore.collection('staff').doc(user.uid).get({ source: 'server' }); // ★ キャッシュ無視
 
             if (!staffDoc.exists) {
                 throw new Error('職員名簿に情報が見つかりません。');
@@ -330,7 +664,6 @@
             if (currentUser.passwordChanged === false) {
                 showChangePasswordSection();
             } else {
-                // ★ 管理者であっても、まずメイン画面を表示する
                 showMainSection();
             }
 
@@ -395,7 +728,7 @@
             
             currentUser.passwordChanged = true;
             
-            showMainSection(); // メイン画面に戻る
+            showMainSection(); 
 
         } catch (error) {
             console.error('パスワード変更エラー:', error);
@@ -403,7 +736,32 @@
         }
     }
 
+    /* --- 🔽 JS 修正 (ログアウト警告) 🔽 --- */
+    // 変更が未保存かチェックする関数
+    function hasUnsavedChanges() {
+        if (!currentUser) return false; // ログイン前はチェックしない
+        
+        // キーの数が違う時点で「変更あり」
+        if (Object.keys(selectedDates).length !== Object.keys(originalSelectedDates).length) {
+            return true;
+        }
+        // キーの中身をチェック
+        for (const date in selectedDates) {
+            if (selectedDates[date] !== originalSelectedDates[date]) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     async function logout() {
+        // ★ ログアウト警告チェック
+        if (hasUnsavedChanges()) {
+            if (!confirm('変更された希望が提出されていません。\n保存せずにログアウトしますか？')) {
+                return; // ログアウトをキャンセル
+            }
+        }
+        
         try {
             await auth.signOut();
         } catch (error) {
@@ -412,6 +770,7 @@
         
         currentUser = null;
         selectedDates = {};
+        originalSelectedDates = {}; // ★ リセット
         selectedRequestType = null;
         
         document.getElementById('userId').value = '';
@@ -424,6 +783,8 @@
         document.getElementById('changePasswordSection').classList.add('hidden');
         document.getElementById('syncStatus').classList.add('hidden');
     }
+    /* --- 🔼 JS 修正 🔼 --- */
+
 
     // ============================================
     // 画面表示
@@ -441,9 +802,8 @@
         document.getElementById('mainSection').classList.remove('hidden');
         document.getElementById('syncStatus').classList.remove('hidden');
         
-        document.getElementById('welcomeMessage').textContent = currentUser.name + 'さん、こんにちは';
+        document.getElementById('welcomeMessage').textContent = currentUser.name + 'さん、お疲れ様です';
 
-        // ★ 管理者ボタンの表示/非表示を切り替え
         if (currentUser.isAdmin === true) {
             document.getElementById('adminButton').classList.remove('hidden');
         } else {
@@ -678,40 +1038,43 @@
     // 希望管理 (Firestore版)
     // ============================================
 
+    /* --- 🔽 JS 修正 (書き込み方法の変更) 🔽 --- */
     async function saveRequestsToFirebase(monthKey, staffUid, data) {
-        try {
-            const docRef = firestore.collection('requests').doc(monthKey);
-            
-            // ★ 修正 ★
-            // .set(..., { merge: true }) から .update() に変更します
-            // これにより、指定した職員のデータ(staffUid)が丸ごと置き換わります
-            await docRef.update({
-                [staffUid]: data
-            });
-            
-            console.log('希望データ保存完了:', monthKey, staffUid);
-        } catch (error) {
-            // もし requests/2025-12 ドキュメント自体が存在しない場合、
+        try {
+            const docRef = firestore.collection('requests').doc(monthKey);
+            
+            // ★ .set(..., { merge: true }) から .update() に変更
+            // これにより、指定した職員のデータ(staffUid)が丸ごと置き換わる
+            await docRef.update({
+                [staffUid]: data
+            });
+            
+            console.log('希望データ保存完了 (update):', monthKey, staffUid);
+        } catch (error) {
+            // もし requests/2025-12 ドキュメント自体が存在しない(＝その月の最初の提出)場合、
             // update() は失敗するため、代わりに set() で作成します。
             if (error.code === 'not-found') {
                 console.warn('ドキュメント未作成のため、set() で新規作成します');
                 const docRef = firestore.collection('requests').doc(monthKey);
-                await docRef.set({ [staffUid]: data });
+                // ★ merge:true を使い、他の職員のデータを消さずに追記する
+                await docRef.set({ [staffUid]: data }, { merge: true });
+                console.log('希望データ保存完了 (set):', monthKey, staffUid);
             } else {
                 console.error('希望データ保存エラー:', error);
                 throw error;
             }
         }
     }
+    /* --- 🔼 JS 修正 🔼 --- */
 
-    /* --- 🔽 JS 修正 1/4 🔽 --- */
+
+    /* --- 🔽 JS 修正 (キャッシュ対応) 🔽 --- */
     async function loadUserRequests() {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth() + 1;
         const monthKey = year + '-' + String(month).padStart(2, '0');
         
         try {
-            // ★ .get() に { source: 'server' } を追加
             const doc = await firestore.collection('requests').doc(monthKey).get({ source: 'server' });
             
             if (doc.exists && doc.data()[currentUser.uid]) {
@@ -720,16 +1083,22 @@
             } else {
                 selectedDates = {}; 
             }
+            
+            // ★ ログアウト警告用に、読み込んだ状態をディープコピーして保存
+            originalSelectedDates = JSON.parse(JSON.stringify(selectedDates));
+
         } catch (error) {
             console.error("希望の読み込みエラー:", error);
             selectedDates = {};
+            originalSelectedDates = {};
         }
         
         updateSelectedDatesList();
     }
-    /* --- 🔼 JS 修正 1/4 🔼 --- */
+    /* --- 🔼 JS 修正 🔼 --- */
 
 
+    /* --- 🔽 JS 修正 (ポップアップ通知) 🔽 --- */
     async function submitRequests() {
         if (Object.keys(selectedDates).length === 0) {
             if (!confirm('希望が選択されていません。空の希望（希望なし）として提出しますか？')) {
@@ -759,37 +1128,37 @@
             
             await saveRequestsToFirebase(monthKey, currentUser.uid, data);
             
-            document.getElementById('submitMessage').innerHTML = 
-                '<span class="success-message">希望が提出されました！</span>';
+            // ★ ポップアップに変更
+            alert('希望が提出されました！');
+            
+            // ★ ログアウト警告用に、保存成功した状態をオリジナルとして記憶
+            originalSelectedDates = JSON.parse(JSON.stringify(selectedDates));
             
             await updateSubmissionStatus();
 
-            setTimeout(() => {
-                document.getElementById('submitMessage').innerHTML = '';
-            }, 3000);
+            // ★ submitMessage は使わないので削除
 
         } catch (error) {
-             document.getElementById('submitMessage').innerHTML = 
-                '<span class="error-message">提出エラー: ' + error.message + '</span>';
+             // ★ ポップアップに変更
+             alert('提出エラー: ' + error.message);
         } finally {
             submitButton.disabled = false;
             submitButton.textContent = '希望を提出';
         }
     }
+    /* --- 🔼 JS 修正 🔼 --- */
 
-    /* --- 🔽 JS 修正 2/4 🔽 --- */
+
     async function updateSubmissionStatus() {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth() + 1;
         const monthKey = year + '-' + String(month).padStart(2, '0');
 
         try {
-            // ★ .get() に { source: 'server' } を追加
             const staffSnapshot = await firestore.collection('staff').get({ source: 'server' });
             
             const allStaff = staffSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
             
-            // ★ .get() に { source: 'server' } を追加
             const requestsDoc = await firestore.collection('requests').doc(monthKey).get({ source: 'server' });
             const monthRequests = requestsDoc.exists ? requestsDoc.data() : {};
 
@@ -797,7 +1166,6 @@
             const notSubmitted = [];
 
             for (const staff of allStaff) {
-                // ★ ID 31 の Admin ユーザーだけを除外
                 if (staff.originalId === 31) continue; 
 
                 if (monthRequests[staff.uid]) {
@@ -827,7 +1195,6 @@
                 '<span style="color: red;">提出状況の取得に失敗しました (エラー: ' + error.message + ')</span>';
         }
     }
-    /* --- 🔼 JS 修正 2/4 🔼 --- */
 
 
     function previousMonth() {
@@ -843,7 +1210,6 @@
     // 管理者機能
     // ============================================
     
-    /* --- 🔽 JS 修正 3/4 🔽 --- */
     async function renderAdminTable() {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth() + 1;
@@ -852,15 +1218,12 @@
         document.getElementById('adminMonth').textContent = year + '年' + month + '月の希望一覧';
         
         try {
-            // ★ .get() に { source: 'server' } を追加
             const staffSnapshot = await firestore.collection('staff').get({ source: 'server' });
                 
             staffListForAdmin = staffSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
             
-            // ★ JS側で並べ替え
             staffListForAdmin.sort((a, b) => (a.originalId || 0) - (b.originalId || 0));
 
-            // ★ .get() に { source: 'server' } を追加
             const requestsDoc = await firestore.collection('requests').doc(monthKey).get({ source: 'server' });
             allRequestsForAdmin = requestsDoc.exists ? requestsDoc.data() : {};
             
@@ -875,7 +1238,6 @@
             tbody.innerHTML = '';
             
             for (const staffMember of staffListForAdmin) {
-                // ★ ID 31 の Admin ユーザーだけを除外
                 if (staffMember.originalId === 31) continue; 
 
                 let row = '<tr>';
@@ -915,7 +1277,6 @@
                 `<tr><td colspan="34" style="color: red;">データ取得エラー: ${error.message}</td></tr>`;
         }
     }
-    /* --- 🔼 JS 修正 3/4 🔼 --- */
 
 
     async function showPreviousMonth() {
@@ -931,7 +1292,6 @@
         await renderAdminTable();
     }
 
-    /* --- 🔽 JS 修正 4/4 🔽 --- */
     function exportToCSV() {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth() + 1;
@@ -941,9 +1301,7 @@
         for (let day = 1; day <= daysInMonth; day++) { csv += ',' + day + '日'; }
         csv += '\n';
         
-        // ★ staffListForAdmin を使う (すでにソート済み)
         staffListForAdmin.forEach(staffMember => {
-            // ★ ID 31 の Admin ユーザーだけを除外
             if (staffMember.originalId === 31) return;
 
             csv += `${staffMember.originalId || ''},`;
@@ -953,7 +1311,6 @@
             if (staffMember.leader) { name += '(L)'; }
             csv += name;
 
-            // ★ allRequestsForAdmin を使う
             const staffRequestData = allRequestsForAdmin[staffMember.uid];
             const dates = staffRequestData ? staffRequestData.dates : {};
             
@@ -970,7 +1327,6 @@
         link.download = 'shift_requests_' + year + '_' + month + '.csv';
         link.click();
     }
-    /* --- 🔼 JS 修正 4/4 🔼 --- */
 
     // ============================================
     // 初期化処理
@@ -1025,6 +1381,15 @@
             document.getElementById('password').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     login();
+                }
+            });
+            
+            // ★ 修正 ★ (ページを閉じる/移動する時の警告)
+            window.addEventListener('beforeunload', (event) => {
+                if (currentUser && hasUnsavedChanges()) {
+                    // 警告メッセージを表示
+                    event.preventDefault();
+                    event.returnValue = ''; // (ブラウザ標準の警告文が表示されます)
                 }
             });
             
