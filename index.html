@@ -1139,8 +1139,6 @@
 
             for (const staff of allStaff) {
                 // ★ JS側で管理者をスキップする処理を追加
-                if (staff.isAdmin === true) continue; 
-
                 if (monthRequests[staff.uid]) {
                     submitted.push(staff.name);
                 } else {
