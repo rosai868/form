@@ -229,25 +229,29 @@
     let db = null;        
 
     function initializeFirebase() {
-        try {
-            if (typeof firebaseConfig === 'undefined' || !firebaseConfig.apiKey) {
-                console.error('firebase-config.js が正しく読み込まれていないか、中身が空です。');
-                alert('Firebaseの設定ファイル(firebase-config.js)が読み込めません。');
-                return false;
-            }
+        try {
+            if (typeof firebaseConfig === 'undefined' || !firebaseConfig.apiKey) {
+                console.error('firebase-config.js が正しく読み込まれていないか、中身が空です。');
+                alert('Firebaseの設定ファイル(firebase-config.js)が読み込めません。');
+                return false;
+            }
 
-            firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth();
-            firestore = firebase.firestore();
-            db = firebase.database();
-            console.log('Firebase初期化成功 (Auth, Firestore)');
-            return true;
-        } catch (error) {
-            console.error('Firebase初期化エラー:', error);
-            alert('システムの初期化に失敗しました。設定を確認してください。');
-            return false;
-        }
-    }
+            firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            firestore = firebase.firestore();
+
+            /* ▼▼▼ この1行を必ず追加してください ▼▼▼ */
+            firestore.settings({ persistence: false });
+
+            db = firebase.database();
+            console.log('Firebase初期化成功 (Auth, Firestore)');
+            return true;
+        } catch (error) {
+            console.error('Firebase初期化エラー:', error);
+            alert('システムの初期化に失敗しました。設定を確認してください。');
+            return false;
+        }
+    }
 
     // ============================================
     // グローバル変数
