@@ -13,432 +13,75 @@
     
     <style>
         /* (CSSは変更なし) */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
-            background: #f4f7f6;
-            padding: 20px;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: #ffffff;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            border: 1px solid #e0e0e0;
-        }
-
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 30px;
-            font-size: 24px;
-        }
-
-        h2 {
-            text-align: center;
-            color: #34495e;
-            margin-bottom: 20px;
-            font-size: 20px;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 18px;
-            color: #666;
-        }
-
-        .login-container {
-            max-width: 400px;
-            margin: 50px auto;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-            font-weight: bold;
-        }
-
-        input[type="text"],
-        input[type="password"],
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #dde1e3;
-            border-radius: 4px;
-            font-size: 14px;
-            background: #fdfdfd;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #005A9C;
-            box-shadow: 0 0 0 2px rgba(0,90,156,0.1);
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #005A9C;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-
-        button:hover {
-            background: #004a80;
-        }
-
-        button:disabled {
-            background: #cccccc;
-            cursor: not-allowed;
-        }
-
-        .timer {
-            background: #f5f5f5;
-            border: 1px solid #ddd;
-            color: #666;
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 15px;
-            text-align: right;
-            font-size: 12px;
-        }
-
-        .timer-display {
-            font-size: 14px;
-            font-weight: normal;
-            margin-top: 5px;
-            color: #333;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            background: #f5f5f5;
-            border-radius: 8px;
-        }
-
-        .calendar-header button {
-            width: auto;
-            padding: 8px 20px;
-            background: #6c757d;
-        }
-
-        .calendar-header button:hover {
-            background: #5a6268;
-        }
-
-        #calendar {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 2px;
-            background: #ddd;
-            padding: 2px;
-            border-radius: 4px;
-        }
-
-        .weekday-header {
-            background: #343a40;
-            color: white;
-            padding: 10px 5px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 12px;
-        }
-
-        .weekday-header.sunday {
-            background: #dc3545;
-        }
-
-        .weekday-header.saturday {
-            background: #007bff;
-        }
-
-        .calendar-day {
-            background: white;
-            height: 65px;
-            display: flex;
-            flex-direction: column;
-            cursor: pointer;
-            position: relative; 
-            user-select: none;
-            transition: background 0.2s;
-            border: 2px solid transparent;
-        }
-        .calendar-day.selected {
-             box-sizing: border-box; 
-        }
-
-        .calendar-day:hover:not(.disabled):not(.empty) {
-            background: #f0f7ff;
-        }
-
-        .calendar-day.empty {
-            background: #f4f7f6;
-            cursor: default;
-            border: none;
-        }
-
-        .calendar-day.sunday {
-            background: #fdf2f2;
-        }
-
-        .calendar-day.saturday {
-            background: #f0f7ff;
-        }
-
-        .calendar-day.holiday {
-            background: #fff5f5;
-        }
-
-        .calendar-day.disabled {
-            background: #f0f0f0;
-            color: #aaa;
-            cursor: not-allowed;
-        }
-
-        .calendar-day.selected-休 {
-            border-color: #dc3545;
-            background-color: #fdf2f2;
-        }
-        .calendar-day.selected-年 {
-            border-color: #007bff;
-            background-color: #f0f7ff;
-        }
-        .calendar-day.selected-出 {
-            border-color: #fd7e14;
-            background-color: #fff8f0;
-        }
-        .calendar-day.selected-日 {
-            border-color: #28a745;
-            background-color: #f0fff4;
-        }
-
-        .calendar-day-number {
-            font-size: 16px; 
-            font-weight: bold;
-            position: absolute; 
-            top: 4px;
-            right: 4px;
-            color: #555; 
-        }
-
-        .calendar-day-request {
-            position: absolute;
-            bottom: 4px; 
-            left: 4px;   
-            font-size: 11px;
-            padding: 1px 4px;
-            border-radius: 3px;
-            font-weight: 600;
-        }
-        .request-type-休 {
-            color: #dc3545; background: #fdf2f2; border: 1px solid #dc3545;
-        }
-        .request-type-年 {
-            color: #007bff; background: #f0f7ff; border: 1px solid #007bff;
-        }
-        .request-type-出 {
-            color: #fd7e14; background: #fff8f0; border: 1px solid #fd7e14;
-        }
-        .request-type-日 {
-            color: #28a745; background: #f0fff4; border: 1px solid #28a745;
-        }
-
-        .request-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 10px;
-            margin: 20px 0;
-        }
-
-        .request-button {
-            padding: 15px 10px;
-            text-align: center;
-            border: 2px solid #dde1e3;
-            border-radius: 4px;
-            cursor: pointer;
-            background: white;
-            font-weight: bold;
-            transition: all 0.2s;
-        }
-
-        .request-button:hover:not(.active) {
-            background: #f5f5f5;
-            border-color: #b0b0b0;
-        }
-
-        .request-button.active[data-type="休"] {
-            background-color: #dc3545; border-color: #dc3545; color: white;
-        }
-        .request-button.active[data-type="年"] {
-            background-color: #007bff; border-color: #007bff; color: white;
-        }
-        .request-button.active[data-type="出"] {
-            background-color: #fd7e14; border-color: #fd7e14; color: white;
-        }
-        .request-button.active[data-type="日"] {
-            background-color: #28a745; border-color: #28a745; color: white;
-        }
-
-        .selected-dates {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f5f5f5;
-            border-radius: 4px;
-        }
-
-        .selected-date-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px;
-            margin: 5px 0;
-            background: white;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-        
-        .selected-date-item button {
-            width: auto;
-            padding: 5px 15px;
-            background: #dc3545;
-            font-size: 12px;
-        }
-        .selected-date-item button:hover {
-            background: #c82333;
-        }
-
-        .error-message {
-            color: #dc3545;
-            margin-top: 10px;
-            text-align: center;
-        }
-
-        .success-message {
-            color: #28a745;
-            margin-top: 10px;
-            text-align: center;
-        }
-
-        .admin-table-container {
-            overflow-x: auto;
-            margin-top: 20px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .admin-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-        }
-
-        .admin-table th,
-        .admin-table td {
-            border: 1px solid #ddd;
-            padding: 5px;
-            text-align: center;
-        }
-
-        .admin-table th {
-            background: #343a40;
-            color: white;
-            font-weight: bold;
-            position: sticky;
-            top: 0;
-        }
-
-        .admin-table td:first-child { /* ID列 */
-            text-align: center;
-            font-weight: bold;
-            background: #f5f5f5;
-            position: sticky;
-            left: 0;
-            min-width: 20px; /* ★ 40pxから30pxに変更 */
-        }
-        
-        .admin-table td:nth-child(2) { /* チーム列 */
-            text-align: center;
-            font-weight: bold;
-            background: #f5f5f5;
-            position: sticky;
-            left: 20px; /* ★ 40pxから30pxに変更 (ID列の幅に合わせる) */
-            min-width: 30px; /* ★ 50pxから40pxに変更 */
-        }
-        
-        .admin-table td:nth-child(3) { /* 職員名列 */
-            text-align: left;
-            padding-left: 10px;
-            font-weight: bold;
-            background: #f5f5f5;
-            position: sticky;
-            left: 65px; /* (変更なし: ID 30px + チーム 35px) */
-            min-width: 75px; /* ★ 85pxから75pxに縮小 */
-            white-space: nowrap; 
-        }
-        .logout-button {
-            background: #dc3545;
-            margin-top: 20px;
-        }
-
-        .logout-button:hover {
-            background: #c82333;
-        }
-        
-        .password-change-button {
-            background: #fd7e14;
-            margin-top: 10px;
-        }
-        .password-change-button:hover {
-            background: #e66a01;
-        }
-
-        .sync-status {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            background: #28a745;
-            color: white;
-            border-radius: 20px;
-            font-size: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-
-        .sync-status.offline {
-            background: #dc3545;
-        }
-
-        .sync-status.syncing {
-            background: #FF9800;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif; background: #f4f7f6; padding: 20px; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; background: #ffffff; border-radius: 8px; padding: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e0e0e0; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; font-size: 24px; }
+        h2 { text-align: center; color: #34495e; margin-bottom: 20px; font-size: 20px; }
+        .hidden { display: none !important; }
+        .loading { text-align: center; padding: 50px; font-size: 18px; color: #666; }
+        .login-container { max-width: 400px; margin: 50px auto; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; color: #555; font-weight: bold; }
+        input[type="text"], input[type="password"], select { width: 100%; padding: 12px; border: 1px solid #dde1e3; border-radius: 4px; font-size: 14px; background: #fdfdfd; }
+        input:focus { outline: none; border-color: #005A9C; box-shadow: 0 0 0 2px rgba(0,90,156,0.1); }
+        button { width: 100%; padding: 12px; background: #005A9C; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        button:hover { background: #004a80; }
+        button:disabled { background: #cccccc; cursor: not-allowed; }
+        .timer { background: #f5f5f5; border: 1px solid #ddd; color: #666; padding: 12px; border-radius: 4px; margin-bottom: 15px; text-align: right; font-size: 12px; }
+        .timer-display { font-size: 14px; font-weight: normal; margin-top: 5px; color: #333; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px; }
+        .calendar-header button { width: auto; padding: 8px 20px; background: #6c757d; }
+        .calendar-header button:hover { background: #5a6268; }
+        #calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background: #ddd; padding: 2px; border-radius: 4px; }
+        .weekday-header { background: #343a40; color: white; padding: 10px 5px; text-align: center; font-weight: bold; font-size: 12px; }
+        .weekday-header.sunday { background: #dc3545; }
+        .weekday-header.saturday { background: #007bff; }
+        .calendar-day { background: white; height: 65px; display: flex; flex-direction: column; cursor: pointer; position: relative; user-select: none; transition: background 0.2s; border: 2px solid transparent; }
+        .calendar-day.selected { box-sizing: border-box; }
+        .calendar-day:hover:not(.disabled):not(.empty) { background: #f0f7ff; }
+        .calendar-day.empty { background: #f4f7f6; cursor: default; border: none; }
+        .calendar-day.sunday { background: #fdf2f2; }
+        .calendar-day.saturday { background: #f0f7ff; }
+        .calendar-day.holiday { background: #fff5f5; }
+        .calendar-day.disabled { background: #f0f0f0; color: #aaa; cursor: not-allowed; }
+        .calendar-day.selected-休 { border-color: #dc3545; background-color: #fdf2f2; }
+        .calendar-day.selected-年 { border-color: #007bff; background-color: #f0f7ff; }
+        .calendar-day.selected-出 { border-color: #fd7e14; background-color: #fff8f0; }
+        .calendar-day.selected-日 { border-color: #28a745; background-color: #f0fff4; }
+        .calendar-day-number { font-size: 16px; font-weight: bold; position: absolute; top: 4px; right: 4px; color: #555; }
+        .calendar-day-request { position: absolute; bottom: 4px; left: 4px; font-size: 11px; padding: 1px 4px; border-radius: 3px; font-weight: 600; }
+        .request-type-休 { color: #dc3545; background: #fdf2f2; border: 1px solid #dc3545; }
+        .request-type-年 { color: #007bff; background: #f0f7ff; border: 1px solid #007bff; }
+        .request-type-出 { color: #fd7e14; background: #fff8f0; border: 1px solid #fd7e14; }
+        .request-type-日 { color: #28a745; background: #f0fff4; border: 1px solid #28a745; }
+        .request-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 20px 0; }
+        .request-button { padding: 15px 10px; text-align: center; border: 2px solid #dde1e3; border-radius: 4px; cursor: pointer; background: white; font-weight: bold; transition: all 0.2s; }
+        .request-button:hover:not(.active) { background: #f5f5f5; border-color: #b0b0b0; }
+        .request-button.active[data-type="休"] { background-color: #dc3545; border-color: #dc3545; color: white; }
+        .request-button.active[data-type="年"] { background-color: #007bff; border-color: #007bff; color: white; }
+        .request-button.active[data-type="出"] { background-color: #fd7e14; border-color: #fd7e14; color: white; }
+        .request-button.active[data-type="日"] { background-color: #28a745; border-color: #28a745; color: white; }
+        .selected-dates { margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 4px; }
+        .selected-date-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; margin: 5px 0; background: white; border-radius: 4px; border: 1px solid #ddd; }
+        .selected-date-item button { width: auto; padding: 5px 15px; background: #dc3545; font-size: 12px; }
+        .selected-date-item button:hover { background: #c82333; }
+        .error-message { color: #dc3545; margin-top: 10px; text-align: center; }
+        .success-message { color: #28a745; margin-top: 10px; text-align: center; }
+        .admin-table-container { overflow-x: auto; margin-top: 20px; border: 1px solid #ddd; border-radius: 4px; }
+        .admin-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .admin-table th, .admin-table td { border: 1px solid #ddd; padding: 5px; text-align: center; }
+        .admin-table th { background: #343a40; color: white; font-weight: bold; position: sticky; top: 0; }
+        .admin-table td:first-child { text-align: center; font-weight: bold; background: #f5f5f5; position: sticky; left: 0; min-width: 30px; }
+        .admin-table td:nth-child(2) { text-align: center; font-weight: bold; background: #f5f5f5; position: sticky; left: 30px; min-width: 35px; }
+        .admin-table td:nth-child(3) { text-align: left; padding-left: 10px; font-weight: bold; background: #f5f5f5; position: sticky; left: 65px; min-width: 75px; white-space: nowrap; }
+        .logout-button { background: #dc3545; margin-top: 20px; }
+        .logout-button:hover { background: #c82333; }
+        .password-change-button { background: #fd7e14; margin-top: 10px; }
+        .password-change-button:hover { background: #e66a01; }
+        .sync-status { position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: #28a745; color: white; border-radius: 20px; font-size: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .sync-status.offline { background: #dc3545; }
+        .sync-status.syncing { background: #FF9800; }
     </style>
 </head>
 <body>
@@ -680,14 +323,12 @@
                 ...staffDoc.data()
             };
 
-            /* --- 🔽 JS 修正 3/6 🔽 --- */
             if (currentUser.passwordChanged === false) {
                 showChangePasswordSection();
             } else {
                 // ★ 管理者であっても、まずメイン画面を表示する
                 showMainSection();
             }
-            /* --- 🔼 JS 修正 3/6 🔼 --- */
 
         } catch (error) {
             console.error('ログインエラー:', error);
@@ -750,8 +391,7 @@
             
             currentUser.passwordChanged = true;
             
-            // ★ 修正 ★ (ログイン時と同じロジックに変更)
-            showMainSection();
+            showMainSection(); // メイン画面に戻る
 
         } catch (error) {
             console.error('パスワード変更エラー:', error);
@@ -790,7 +430,6 @@
         document.getElementById('changePasswordSection').classList.remove('hidden');
     }
 
-    /* --- 🔽 JS 修正 4/6 🔽 --- */
     async function showMainSection() {
         document.getElementById('loginSection').classList.add('hidden');
         document.getElementById('changePasswordSection').classList.add('hidden');
@@ -814,7 +453,6 @@
         renderCalendar(); 
         await updateSubmissionStatus();
     }
-    /* --- 🔼 JS 修正 4/6 🔼 --- */
 
 
     async function showAdminSection() {
@@ -1050,12 +688,14 @@
         }
     }
 
+    /* --- 🔽 JS 修正 1/4 🔽 --- */
     async function loadUserRequests() {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth() + 1;
         const monthKey = year + '-' + String(month).padStart(2, '0');
         
         try {
+            // ★ .get() に { source: 'server' } を追加
             const doc = await firestore.collection('requests').doc(monthKey).get({ source: 'server' });
             
             if (doc.exists && doc.data()[currentUser.uid]) {
@@ -1071,6 +711,8 @@
         
         updateSelectedDatesList();
     }
+    /* --- 🔼 JS 修正 1/4 🔼 --- */
+
 
     async function submitRequests() {
         if (Object.keys(selectedDates).length === 0) {
@@ -1119,18 +761,19 @@
         }
     }
 
-    /* --- 🔽 JS 修正 5/6 🔽 --- */
+    /* --- 🔽 JS 修正 2/4 🔽 --- */
     async function updateSubmissionStatus() {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth() + 1;
         const monthKey = year + '-' + String(month).padStart(2, '0');
 
         try {
-            // ★ .where() を削除
+            // ★ .get() に { source: 'server' } を追加
             const staffSnapshot = await firestore.collection('staff').get({ source: 'server' });
             
             const allStaff = staffSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
             
+            // ★ .get() に { source: 'server' } を追加
             const requestsDoc = await firestore.collection('requests').doc(monthKey).get({ source: 'server' });
             const monthRequests = requestsDoc.exists ? requestsDoc.data() : {};
 
@@ -1138,9 +781,9 @@
             const notSubmitted = [];
 
             for (const staff of allStaff) {
-                if (staff.originalId === 31) continue;
-                
-                // ★ JS側で管理者をスキップする処理を追加
+                // ★ ID 31 の Admin ユーザーだけを除外
+                if (staff.originalId === 31) continue; 
+
                 if (monthRequests[staff.uid]) {
                     submitted.push(staff.name);
                 } else {
@@ -1168,7 +811,7 @@
                 '<span style="color: red;">提出状況の取得に失敗しました (エラー: ' + error.message + ')</span>';
         }
     }
-    /* --- 🔼 JS 修正 5/6 🔼 --- */
+    /* --- 🔼 JS 修正 2/4 🔼 --- */
 
 
     function previousMonth() {
@@ -1184,7 +827,7 @@
     // 管理者機能
     // ============================================
     
-    /* --- 🔽 JS 修正 6/6 🔽 --- */
+    /* --- 🔽 JS 修正 3/4 🔽 --- */
     async function renderAdminTable() {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth() + 1;
@@ -1193,14 +836,15 @@
         document.getElementById('adminMonth').textContent = year + '年' + month + '月の希望一覧';
         
         try {
-            // ★ .orderBy() を削除
+            // ★ .get() に { source: 'server' } を追加
             const staffSnapshot = await firestore.collection('staff').get({ source: 'server' });
                 
             staffListForAdmin = staffSnapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
             
-            // ★ JS側で並べ替える処理を追加
+            // ★ JS側で並べ替え
             staffListForAdmin.sort((a, b) => (a.originalId || 0) - (b.originalId || 0));
 
+            // ★ .get() に { source: 'server' } を追加
             const requestsDoc = await firestore.collection('requests').doc(monthKey).get({ source: 'server' });
             allRequestsForAdmin = requestsDoc.exists ? requestsDoc.data() : {};
             
@@ -1215,7 +859,9 @@
             tbody.innerHTML = '';
             
             for (const staffMember of staffListForAdmin) {
-               
+                // ★ ID 31 の Admin ユーザーだけを除外
+                if (staffMember.originalId === 31) continue; 
+
                 let row = '<tr>';
                 row += `<td>${staffMember.originalId || ''}</td>`;
                 row += `<td>${staffMember.team || ''}</td>`;
@@ -1253,7 +899,7 @@
                 `<tr><td colspan="34" style="color: red;">データ取得エラー: ${error.message}</td></tr>`;
         }
     }
-    /* --- 🔼 JS 修正 6/6 🔼 --- */
+    /* --- 🔼 JS 修正 3/4 🔼 --- */
 
 
     async function showPreviousMonth() {
@@ -1269,6 +915,7 @@
         await renderAdminTable();
     }
 
+    /* --- 🔽 JS 修正 4/4 🔽 --- */
     function exportToCSV() {
         const year = currentMonth.getFullYear();
         const month = currentMonth.getMonth() + 1;
@@ -1278,8 +925,10 @@
         for (let day = 1; day <= daysInMonth; day++) { csv += ',' + day + '日'; }
         csv += '\n';
         
+        // ★ staffListForAdmin を使う (すでにソート済み)
         staffListForAdmin.forEach(staffMember => {
-            if (staffMember.isAdmin) return;
+            // ★ ID 31 の Admin ユーザーだけを除外
+            if (staffMember.originalId === 31) return;
 
             csv += `${staffMember.originalId || ''},`;
             csv += `${staffMember.team || ''},`;
@@ -1288,6 +937,7 @@
             if (staffMember.leader) { name += '(L)'; }
             csv += name;
 
+            // ★ allRequestsForAdmin を使う
             const staffRequestData = allRequestsForAdmin[staffMember.uid];
             const dates = staffRequestData ? staffRequestData.dates : {};
             
@@ -1304,6 +954,7 @@
         link.download = 'shift_requests_' + year + '_' + month + '.csv';
         link.click();
     }
+    /* --- 🔼 JS 修正 4/4 🔼 --- */
 
     // ============================================
     // 初期化処理
