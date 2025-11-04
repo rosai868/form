@@ -521,7 +521,7 @@
         <button onclick="login()" id="loginButton">ログイン</button>
         <div style="margin-top: 20px; padding: 15px; background: #FFFBF7; border-radius: 8px; font-size: 12px; color: #777; line-height: 1.6;">
             <p style="margin: 5px 0;">※ ID・パスワードを忘れた場合は師長に連絡してください</p>
-            <p style="margin: 5px 0;">※ 締め切りは毎月7日です</p>
+            <p style="margin: 5px 0;">※ 締め切りは毎月7日の午前9:00です</p>
         </div>
         <div id="loginError" class="error-message"></div>
     </div>
@@ -896,7 +896,7 @@
     
     function setTargetMonth() {
         const now = new Date();
-        const currentMonthDeadline = new Date(now.getFullYear(), now.getMonth(), 7, 23, 59, 59);
+        const currentMonthDeadline = new Date(now.getFullYear(), now.getMonth(), 7, 9, 0, 0);
         
         if (now <= currentMonthDeadline) {
             currentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -986,7 +986,7 @@
 
     function isDateSelectable(date) {
         const now = new Date();
-        const currentMonthDeadline = new Date(now.getFullYear(), now.getMonth(), 7, 23, 59, 59);
+        const currentMonthDeadline = new Date(now.getFullYear(), now.getMonth(), 7, 9, 0, 0);
         
         if (now <= currentMonthDeadline) {
             const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
@@ -1063,13 +1063,13 @@
     function startCountdown() {
         function updateCountdown() {
             const now = new Date();
-            const currentMonthDeadline = new Date(now.getFullYear(), now.getMonth(), 7, 23, 59, 59);
+            const currentMonthDeadline = new Date(now.getFullYear(), now.getMonth(), 7, 9, 0, 0);
             
             let deadline;
             if (now <= currentMonthDeadline) {
                 deadline = currentMonthDeadline;
             } else {
-                deadline = new Date(now.getFullYear(), now.getMonth() + 1, 7, 23, 59, 59);
+                deadline = new Date(now.getFullYear(), now.getMonth() + 1, 7, 9, 0, 0);
             }
             
             const diff = deadline - now;
