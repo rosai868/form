@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>7西シフト希望</title>
+    <title>シフト希望管理システム (Firebase版)</title>
     
     <script src="firebase-config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -20,20 +20,18 @@
         }
 
         body {
-            /* ★ 優しく温かみのあるオフホワイト */
             font-family: "Yu Gothic", YuGothic, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
             background: #FFFBF7; 
             padding: 20px;
-            color: #5D4037; /* ★ 柔らかいダークブラウン */
+            color: #5D4037; 
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             background: #ffffff;
-            border-radius: 12px; /* ★ 角丸を大きく */
+            border-radius: 12px; 
             padding: 30px;
-            /* ★ 柔らかい影 */
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
             border: 1px solid #F0EAE4;
         }
@@ -87,7 +85,7 @@
             width: 100%;
             padding: 12px;
             border: 1px solid #F0EAE4;
-            border-radius: 8px; /* ★ 角丸 */
+            border-radius: 8px; 
             font-size: 14px;
             background: #FFFBF7;
             color: #5D4037;
@@ -95,17 +93,17 @@
 
         input:focus {
             outline: none;
-            border-color: #80CBC4; /* ★ メインカラー (ミント) */
+            border-color: #80CBC4; 
             box-shadow: 0 0 0 3px rgba(128, 203, 196, 0.2);
         }
 
         button {
             width: 100%;
             padding: 12px;
-            background: #80CBC4; /* ★ メインカラー (ミント) */
+            background: #80CBC4; 
             color: white;
             border: none;
-            border-radius: 8px; /* ★ 角丸 */
+            border-radius: 8px; 
             font-size: 16px;
             cursor: pointer;
             font-weight: bold;
@@ -113,7 +111,7 @@
         }
 
         button:hover {
-            background: #4DB6AC; /* ★ 少し濃いミント */
+            background: #4DB6AC; 
         }
 
         button:disabled {
@@ -152,7 +150,7 @@
         .calendar-header button {
             width: auto;
             padding: 8px 20px;
-            background: #B0BEC5; /* ★ 優しいグレー */
+            background: #B0BEC5; 
         }
 
         .calendar-header button:hover {
@@ -162,15 +160,15 @@
         #calendar {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 1px; /* ★ セルの隙間を細く */
+            gap: 1px; 
             background: #E0E0E0;
             border: 1px solid #E0E0E0;
             border-radius: 8px;
-            overflow: hidden; /* 角丸を効かせるため */
+            overflow: hidden; 
         }
 
         .weekday-header {
-            background: #00897B; /* ★ 濃いティール */
+            background: #00897B; 
             color: white;
             padding: 10px 5px;
             text-align: center;
@@ -179,19 +177,20 @@
         }
 
         .weekday-header.sunday {
-            background: #E57373; /* ★ 優しい赤 */
+            background: #E57373; 
         }
 
         .weekday-header.saturday {
-            background: #64B5F6; /* ★ 優しい青 */
+            background: #64B5F6; 
         }
 
-        /* ★ UI改善: カレンダーセル */
         .calendar-day {
             background: white;
-            height: 70px; /* ★ 高さを70pxに */
+            height: 70px; 
             display: flex;
             flex-direction: column;
+            justify-content: center; 
+            align-items: center;     
             cursor: pointer;
             position: relative; 
             user-select: none;
@@ -201,23 +200,7 @@
         .calendar-day.selected {
              box-sizing: border-box; 
         }
-        .calendar-day.selected-特 {
-            border-color: #9575CD;
-            background-color: #F3E5F5;
-        }
-        /* ▼ この3ルールを追加 ▼ */
-        .calendar-day.selected-AM {
-            border-color: #03A9F4;
-            background-color: #E1F5FE;
-        }
-        .calendar-day.selected-PM {
-            border-color: #3F51B5;
-            background-color: #E8EAF6;
-        }
-        .calendar-day.selected-夏 {
-            border-color: #FF9800;
-            background-color: #FFF3E0;
-        }
+
         .calendar-day:hover:not(.disabled):not(.empty) {
             background: #E0F2F1;
         }
@@ -225,7 +208,7 @@
         .calendar-day.empty {
             background: #F4F7F6;
             cursor: default;
-            border: none;
+            border: none; 
         }
 
         .calendar-day.sunday {
@@ -246,7 +229,6 @@
             cursor: not-allowed;
         }
         
-        /* ★ UI改善: 日付の数字 (左上) */
         .calendar-day-number {
             font-size: 15px; 
             font-weight: 600;
@@ -256,14 +238,12 @@
             color: #777; 
         }
 
-        /* ★ UI改善: 希望バッジ (右下・円形) */
         .calendar-day-request {
             position: absolute;
             bottom: 5px; 
             right: 5px;   
             font-size: 11px;
             font-weight: 700;
-            /* ★ 円形にする */
             height: 22px;
             width: 22px;
             border-radius: 50%;
@@ -272,7 +252,6 @@
             justify-content: center;
         }
         
-        /* ★ カレンダーの色分け (淡い色) */
         .request-type-休 {
             color: #EF5350; background: #FFEBEE; border: 1px solid #FFCDD2;
         }
@@ -286,22 +265,52 @@
             color: #66BB6A; background: #E8F5E9; border: 1px solid #C8E6C9;
         }
         .request-type-特 {
-            color: #9575CD; background: #F3E5F5; border: 1px solid #B39DDB;
-        }
-        .request-type-AM {
-            color: #03A9F4; background: #E1F5FE; border: 1px solid #81D4FA;
-        }
-        .request-type-PM {
-            color: #3F51B5; background: #E8EAF6; border: 1px solid #9FA8DA;
-        }
-        .request-type-夏 {
-            color: #FF9800; background: #FFF3E0; border: 1px solid #FFCC80;
-        }
-        /* ★ カレンダーの選択枠線 (色分けしない、メインカラーで統一) */
+            color: #9575CD; background: #F3E5F5; border: 1px solid #B39DDB;
+        }
+        /* ▼ 3つ追加 ▼ */
+        .request-type-AM {
+            color: #03A9F4; background: #E1F5FE; border: 1px solid #81D4FA;
+        }
+        .request-type-PM {
+            color: #3F51B5; background: #E8EAF6; border: 1px solid #9FA8DA;
+        }
+        .request-type-夏 {
+            color: #FF9800; background: #FFF3E0; border: 1px solid #FFCC80;
+        }
+
+
         .calendar-day.selected {
-            border-color: #80CBC4; /* ★ メインカラー (ミント) */
+            border-color: #80CBC4; 
             background-color: #F0FAF9;
         }
+
+        /* ★ 修正 ★ 選択セルの色分けを上書き (より具体的に) */
+        .calendar-day.selected-休 {
+            border-color: #EF5350; background-color: #FFEBEE;
+        }
+        .calendar-day.selected-年 {
+            border-color: #42A5F5; background-color: #E3F2FD;
+        }
+        .calendar-day.selected-出 {
+            border-color: #FFA726; background-color: #FFF8E1;
+        }
+        .calendar-day.selected-日 {
+            border-color: #66BB6A; background-color: #E8F5E9;
+        }
+        .calendar-day.selected-特 {
+            border-color: #9575CD; background-color: #F3E5F5;
+        }
+        /* ▼ 3つ追加 ▼ */
+        .calendar-day.selected-AM {
+            border-color: #03A9F4; background-color: #E1F5FE;
+        }
+        .calendar-day.selected-PM {
+            border-color: #3F51B5; background-color: #E8EAF6;
+        }
+        .calendar-day.selected-夏 {
+            border-color: #FF9800; background-color: #FFF3E0;
+        }
+
 
         .request-buttons {
             display: grid;
@@ -314,7 +323,7 @@
             padding: 15px 10px;
             text-align: center;
             border: 2px solid #E0E0E0;
-            border-radius: 8px; /* ★ 角丸 */
+            border-radius: 8px; 
             cursor: pointer;
             background: white;
             font-weight: 600;
@@ -327,7 +336,6 @@
             border-color: #BDBDBD;
         }
         
-        /* ★ アクティブなボタンの色分け (淡い色) */
         .request-button.active[data-type="休"] {
             background-color: #FFEBEE; border-color: #EF5350; color: #EF5350;
         }
@@ -341,17 +349,19 @@
             background-color: #E8F5E9; border-color: #66BB6A; color: #66BB6A;
         }
         .request-button.active[data-type="特"] {
-            background-color: #9575CD; border-color: #9575CD; color: white;
-        }
-        .request-button.active[data-type="AM"] {
-            background-color: #03A9F4; border-color: #03A9F4; color: white; /* 水色 */
-        }
-        .request-button.active[data-type="PM"] {
-            background-color: #3F51B5; border-color: #3F51B5; color: white; /* 藍色 */
-        }
-        .request-button.active[data-type="夏"] {
-            background-color: #FF9800; border-color: #FF9800; color: white; /* オレンジ */
-        }
+            background-color: #F3E5F5; border-color: #9575CD; color: #9575CD;
+        }
+        /* ▼ 3つ追加 ▼ */
+        .request-button.active[data-type="AM"] {
+            background-color: #E1F5FE; border-color: #03A9F4; color: #03A9F4;
+        }
+        .request-button.active[data-type="PM"] {
+            background-color: #E8EAF6; border-color: #3F51B5; color: #3F51B5;
+        }
+        .request-button.active[data-type="夏"] {
+            background-color: #FFF3E0; border-color: #FF9800; color: #FF9800;
+        }
+
 
         .selected-dates {
             margin-top: 20px;
@@ -375,7 +385,7 @@
         .selected-date-item button {
             width: auto;
             padding: 5px 15px;
-            background: #FFAB91; /* ★ アクセント (コーラル) */
+            background: #FFAB91; 
             font-size: 12px;
             border-radius: 6px;
         }
@@ -384,13 +394,13 @@
         }
 
         .error-message {
-            color: #EF5350; /* ★ */
+            color: #EF5350; 
             margin-top: 10px;
             text-align: center;
         }
 
         .success-message {
-            color: #66BB6A; /* ★ */
+            color: #66BB6A; 
             margin-top: 10px;
             text-align: center;
         }
@@ -410,12 +420,12 @@
 
         .admin-table th, .admin-table td {
             border: 1px solid #E0E0E0;
-            padding: 8px 5px; /* ★ パディングを少し調整 */
+            padding: 8px 5px; 
             text-align: center;
         }
 
         .admin-table th {
-            background: #80CBC4; /* ★ メインカラー (ミント) */
+            background: #80CBC4; 
             color: white;
             font-weight: 600;
             position: sticky;
@@ -451,7 +461,7 @@
         }
 
         .logout-button {
-            background: #FFAB91; /* ★ アクセント (コーラル) */
+            background: #FFAB91; 
             margin-top: 20px;
         }
 
@@ -460,7 +470,7 @@
         }
         
         .password-change-button {
-            background: #FFD54F; /* ★ アクセント (黄) */
+            background: #FFD54F; 
             color: #5D4037;
             margin-top: 10px;
         }
@@ -499,7 +509,7 @@
     </div>
 
     <div id="loginSection" class="container login-container hidden">
-        <h1>7西シフト希望</h1>
+        <h1>シフト希望管理システム</h1>
         <div class="form-group">
             <label for="userId">ID</label>
             <input type="text" id="userId" placeholder="IDを入力">
@@ -532,7 +542,7 @@
     </div>
 
     <div id="mainSection" class="container hidden">
-        <h1>7西シフト</h1>
+        <h1>シフト希望入力</h1>
         <div id="welcomeMessage" style="text-align: center; margin-bottom: 20px;"></div>
         
         <div class="timer">
@@ -568,10 +578,10 @@
                 午前休希望<br>（AM）
             </div>
             <div class="request-button" onclick="setRequestType('PM')" data-type="PM">
-                午後休希望<br>（PM）
+                午後休み希望<br>（PM）
             </div>
             <div class="request-button" onclick="setRequestType('夏')" data-type="夏">
-                夏休み希望<br>（PM）
+                夏休み希望<br>（夏）
             </div>
         </div>
 
@@ -657,8 +667,7 @@
             auth = firebase.auth();
             firestore = firebase.firestore();
 
-            // ★ キャッシュ無効化
-            firestore.settings({ persistence: false });
+            firestore.settings({ persistence: false }); // ★ キャッシュ無効化
 
             db = firebase.database();
             console.log('Firebase初期化成功 (Auth, Firestore)');
@@ -684,8 +693,7 @@
     let selectedDates = {};
     let selectedRequestType = null;
     
-    // ★ ログアウト警告用
-    let originalSelectedDates = {}; 
+    let originalSelectedDates = {}; // ★ ログアウト警告用
     
     let staffListForAdmin = []; 
     let allRequestsForAdmin = {}; 
@@ -794,7 +802,6 @@
         }
     }
 
-    // ★ ログアウト警告用 (関数追加)
     function hasUnsavedChanges() {
         if (!currentUser) return false;
         
@@ -810,10 +817,9 @@
     }
     
     async function logout() {
-        // ★ ログアウト警告チェック
         if (hasUnsavedChanges()) {
             if (!confirm('変更された希望が提出されていません。\n保存せずにログアウトしますか？')) {
-                return; // キャンセル
+                return; 
             }
         }
         
@@ -825,7 +831,7 @@
         
         currentUser = null;
         selectedDates = {};
-        originalSelectedDates = {}; // ★ リセット
+        originalSelectedDates = {}; 
         selectedRequestType = null;
         
         document.getElementById('userId').value = '';
@@ -856,7 +862,7 @@
         document.getElementById('mainSection').classList.remove('hidden');
         document.getElementById('syncStatus').classList.remove('hidden');
         
-        document.getElementById('welcomeMessage').textContent = currentUser.name + 'さん、お疲れ様です！';
+        document.getElementById('welcomeMessage').textContent = currentUser.name + 'さん、こんにちは';
 
         if (currentUser.isAdmin === true) {
             document.getElementById('adminButton').classList.remove('hidden');
@@ -1130,7 +1136,6 @@
                 selectedDates = {}; 
             }
             
-            // ★ ログアウト警告用に、読み込んだ状態をディープコピー
             originalSelectedDates = JSON.parse(JSON.stringify(selectedDates));
 
         } catch (error) {
@@ -1174,7 +1179,6 @@
             // ★ ポップアップ通知
             alert('希望が提出されました！');
             
-            // ★ ログアウト警告用に、保存成功した状態をオリジナルとして記憶
             originalSelectedDates = JSON.parse(JSON.stringify(selectedDates));
             
             await updateSubmissionStatus();
@@ -1297,16 +1301,16 @@
                     
                     let cellStyle = '';
                     switch(cellContent) {
-                        case '休': cellStyle = 'background: #fdf2f2;'; break;
-                        case '年': cellStyle = 'background: #f0f7ff;'; break;
-                        case '出': cellStyle = 'background: #fff8f0;'; break;
-                        case '日': cellStyle = 'background: #f0fff4;'; break;
-                        case '特': cellStyle = 'background: #F3E5F5;'; break;
-                        /* ▼ この3行を追加 ▼ */
-                        case 'AM': cellStyle = 'background: #E1F5FE;'; break;
-                        case 'PM': cellStyle = 'background: #E8EAF6;'; break;
-                        case '夏': cellStyle = 'background: #FFF3E0;'; break;
-                    }
+                        case '休': cellStyle = 'background: #FFEBEE;'; break;
+                        case '年': cellStyle = 'background: #E3F2FD;'; break;
+                        case '出': cellStyle = 'background: #FFF8E1;'; break;
+                        case '日': cellStyle = 'background: #E8F5E9;'; break;
+                        case '特': cellStyle = 'background: #F3E5F5;'; break;
+                        /* ▼ 3つ追加 ▼ */
+                        case 'AM': cellStyle = 'background: #E1F5FE;'; break;
+                        case 'PM': cellStyle = 'background: #E8EAF6;'; break;
+                        case '夏': cellStyle = 'background: #FFF3E0;'; break;
+                    }
                     row += `<td style="${cellStyle}">${cellContent}</td>`;
                 }
                 
