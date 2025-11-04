@@ -201,7 +201,23 @@
         .calendar-day.selected {
              box-sizing: border-box; 
         }
-
+        .calendar-day.selected-特 {
+            border-color: #9575CD;
+            background-color: #F3E5F5;
+        }
+        /* ▼ この3ルールを追加 ▼ */
+        .calendar-day.selected-AM {
+            border-color: #03A9F4;
+            background-color: #E1F5FE;
+        }
+        .calendar-day.selected-PM {
+            border-color: #3F51B5;
+            background-color: #E8EAF6;
+        }
+        .calendar-day.selected-夏 {
+            border-color: #FF9800;
+            background-color: #FFF3E0;
+        }
         .calendar-day:hover:not(.disabled):not(.empty) {
             background: #E0F2F1;
         }
