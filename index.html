@@ -269,7 +269,18 @@
         .request-type-日 {
             color: #66BB6A; background: #E8F5E9; border: 1px solid #C8E6C9;
         }
-
+        .request-type-特 {
+            color: #9575CD; background: #F3E5F5; border: 1px solid #B39DDB;
+        }
+        .request-type-AM {
+            color: #03A9F4; background: #E1F5FE; border: 1px solid #81D4FA;
+        }
+        .request-type-PM {
+            color: #3F51B5; background: #E8EAF6; border: 1px solid #9FA8DA;
+        }
+        .request-type-夏 {
+            color: #FF9800; background: #FFF3E0; border: 1px solid #FFCC80;
+        }
         /* ★ カレンダーの選択枠線 (色分けしない、メインカラーで統一) */
         .calendar-day.selected {
             border-color: #80CBC4; /* ★ メインカラー (ミント) */
@@ -313,7 +324,18 @@
         .request-button.active[data-type="日"] {
             background-color: #E8F5E9; border-color: #66BB6A; color: #66BB6A;
         }
-
+        .request-button.active[data-type="特"] {
+            background-color: #9575CD; border-color: #9575CD; color: white;
+        }
+        .request-button.active[data-type="AM"] {
+            background-color: #03A9F4; border-color: #03A9F4; color: white; /* 水色 */
+        }
+        .request-button.active[data-type="PM"] {
+            background-color: #3F51B5; border-color: #3F51B5; color: white; /* 藍色 */
+        }
+        .request-button.active[data-type="夏"] {
+            background-color: #FF9800; border-color: #FF9800; color: white; /* オレンジ */
+        }
 
         .selected-dates {
             margin-top: 20px;
@@ -531,6 +553,9 @@
             </div>
             <div class="request-button" onclick="setRequestType('PM')" data-type="PM">
                 午後休希望<br>（PM）
+            </div>
+            <div class="request-button" onclick="setRequestType('夏')" data-type="夏">
+                夏休み希望<br>（PM）
             </div>
         </div>
 
@@ -1256,11 +1281,16 @@
                     
                     let cellStyle = '';
                     switch(cellContent) {
-                        case '休': cellStyle = 'background: #FFEBEE;'; break;
-                        case '年': cellStyle = 'background: #E3F2FD;'; break;
-                        case '出': cellStyle = 'background: #FFF8E1;'; break;
-                        case '日': cellStyle = 'background: #E8F5E9;'; break;
-                    }
+                        case '休': cellStyle = 'background: #fdf2f2;'; break;
+                        case '年': cellStyle = 'background: #f0f7ff;'; break;
+                        case '出': cellStyle = 'background: #fff8f0;'; break;
+                        case '日': cellStyle = 'background: #f0fff4;'; break;
+                        case '特': cellStyle = 'background: #F3E5F5;'; break;
+                        /* ▼ この3行を追加 ▼ */
+                        case 'AM': cellStyle = 'background: #E1F5FE;'; break;
+                        case 'PM': cellStyle = 'background: #E8EAF6;'; break;
+                        case '夏': cellStyle = 'background: #FFF3E0;'; break;
+                    }
                     row += `<td style="${cellStyle}">${cellContent}</td>`;
                 }
                 
